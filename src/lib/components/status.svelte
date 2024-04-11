@@ -35,8 +35,6 @@
 
 <div class="flex items-center justify-center h-screen bg-gray-100">
     <div class="border-2 rounded-xl bg-white text-black w-full sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-2/5 h-auto p-4 space-y-2 shadow-md text-center">
-        <!-- <header class="text-xl font-bold text-black">Message type</header> -->
-        <!-- <div class="border-b-2 border-blur"></div> -->
     <div class=" flex justify-center">
         {#if title === 'cancel'}
             <img src="/thanks.png" alt="success" class="mr-1 w-6 h-6 ">
@@ -54,7 +52,7 @@
    
         {#if buttonName}
             <div class="border-b-2 border-blur"></div>
-            <button on:click={handleOnClick} class="bg-[#7165E3] text-white px-2 py-1 rounded-md">{buttonName}</button>
+            <button on:click={handleOnClick} class="btn variant-filled-secondary mb-6 w-[30%]">{buttonName}</button>
         {/if}
         
     </div>
