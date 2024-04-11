@@ -4,6 +4,7 @@
     export let generateOtp: boolean = false;
     export let invalidOtp: boolean = false;
     export let title: string;
+    
     const dispatch = createEventDispatcher();
 
     const handleOnClick = () => {
@@ -13,6 +14,7 @@
         if (invalidOtp) {
             dispatch('reenterOtp');
         }
+        dispatch('home')
     }
 
     let buttonName: string = null;
@@ -23,6 +25,10 @@
 
     if (invalidOtp) {
         buttonName = 'Ok';
+    }
+
+    if (! generateOtp && ! invalidOtp) {
+        buttonName = "Home"
     }
 
 </script>

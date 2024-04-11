@@ -44,18 +44,23 @@
         console.log('handling re enter otp click...');
         goto(`/patient/delete/confirm/?phone=${phone}`);
     }
+
+    const handleHomeClick = () => {
+        console.log('handling home click...');
+        goto(`/`);
+    }
 </script>
 
 <div  >
     {#if statusCode === 'cancel'}
-        <Status title={statusCode} message={thanksMessage}></Status>
+        <Status title={statusCode} on:home={handleHomeClick} message={thanksMessage}></Status>
     {:else if statusCode === 'success'}
-        <Status title={statusCode} message={successMessage}></Status>
+        <Status title={statusCode} on:home={handleHomeClick} message={successMessage}></Status>
         {:else if statusCode === 'invalidotp'}
             <Status title={statusCode} on:reenterOtp={handleReenterOtpClick}  message={invalidOtpMessage} invalidOtp={true} ></Status>
                 {:else if statusCode === 'regenerate'}
                     <Status title={statusCode} on:generateOtp={handleGenerateOtpClick}  message={regenerateMessage} generateOtp={true}></Status>
                 {:else}
-                    <Status title={statusCode} message={statusCode}></Status>
+                    <Status title={statusCode} on:home={handleHomeClick} message={statusCode}></Status>
     {/if}
 </div>
