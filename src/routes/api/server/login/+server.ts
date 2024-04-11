@@ -11,7 +11,6 @@ export const POST = async (event: RequestEvent) => {
 	const data = await request.json();
     const otp = data.otp;
     const phone = data.phone;
-    const patientId = data.patientId;
     let response;
     try {
         response = await loginWithOtp(otp, phone);
@@ -44,7 +43,8 @@ export const POST = async (event: RequestEvent) => {
         return new Response(JSON.stringify({
             Status: response.Status,
             Message: response.Message,
-            HttpCode: response.HttpCode
+            HttpCode: response.HttpCode,
+            PatientUserId: userId
             })
         )
    	} catch (err:any) {

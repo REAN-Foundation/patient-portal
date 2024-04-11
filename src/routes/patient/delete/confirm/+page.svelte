@@ -10,14 +10,8 @@
 	
     export let data: PageServerData;
     let phone = data.phone;
-    let patientId = data.patientId;
     let isConfirm = false;
     const modalStore = getModalStore();
-
-    if (data.isOtpGenerated) {
-        toast.success('OTP has been successfully generated!');
-    }
-
     let enteredOtp;
 
 	let otp = ['', '', '', '', '', ''];
@@ -53,7 +47,6 @@
 			body: JSON.stringify({
                 phone,
                 otp,
-                patientId
             }),
 			headers: {
 				'content-type': 'application/json'
@@ -65,9 +58,11 @@
         console.log('Data',data);
         if (data.Status === 'failure' || data.HttpCode !== 200) {
             const status = PatientPortalHelper.getLoginStatus(data);
-            goto(`/patient/${patientId}/delete/confirm/status?phone=${phone}&code=${status}`)
+            goto(`/patient/delete/confirm/status?phone=${phone}&code=${status}`)
         } else {
         //Perform Delete patient
+        let patientId = data.PatientUserId;
+        console.log('Patient Id',patientId);
         const deleteResponse = await fetch(`/api/server/delete`, {
 			method: 'DELETE',
 			body: JSON.stringify({
@@ -81,13 +76,13 @@
 
         console.log('Deleted Data',deletedData);
         const status = PatientPortalHelper.getPatientDeleteStatus(deletedData);
-        goto(`/patient/${patientId}/delete/confirm/status?code=${status}`);
+        goto(`/patient/delete/confirm/status?code=${status}`);
         }
  	};
 
 	const handleCancel = () => {
 		console.log('Delete cancelled.');
-        goto(`/patient/patientId/delete/confirm/status?code=cancel`);
+        goto(`/patient/delete/confirm/status?code=cancel`);
 	};
 
 	// Modal settings

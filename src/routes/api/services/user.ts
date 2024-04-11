@@ -32,12 +32,22 @@ export const deletePatient = async (sessionId: string, patientId: string) => {
     return await delete_(sessionId, url);
 }
 
-export const generateOtp = async (sessionId: string, phone: string, purpose: string, loginRoleId: number) => {
+export const generateOtp = async (phone: string, purpose: string, loginRoleId?: number) => {
     const url = BACKEND_API_URL + `/users/generate-otp`;
-    const body = {
-        Phone: `+${phone}`,
+    phone = '+'+phone;
+    let body = {
+        Phone: phone,
         Purpose: purpose,
-        RoleId: loginRoleId
+        RoleId: loginRoleId ? loginRoleId: 2
     }
-    return await post_(sessionId, url, body);
+    const headers = {};
+    headers['Content-Type'] = 'application/json';
+    headers['x-api-key'] = API_CLIENT_INTERNAL_KEY;
+    const res = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers
+    });
+    const response = await res.json();
+    return response;
 }

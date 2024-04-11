@@ -10,11 +10,10 @@ export const POST = async (event: RequestEvent) => {
 	const data = await request.json();
     const phone = data.phone;
     const purpose = data.purpose;
-    const loginRoleId = data.loginRoleId ?? 2;
     let response;
 
     try {
-        response = await generateOtp(sessionId!, phone, purpose, loginRoleId)
+        response = await generateOtp(phone, purpose)
         console.log('Response OTP at +server.ts', response);
 
         return new Response(JSON.stringify({

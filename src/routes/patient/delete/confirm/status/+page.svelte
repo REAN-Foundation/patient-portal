@@ -13,19 +13,17 @@
 
     export let data: PageServerData;
     $: statusCode = data.statusCode;
-    const phone = data.phone;
-    const patientId = data.patientId;
+    $: phone = data.phone;
 
     $: console.log('STATUS CODE ',statusCode)
-
     const handleGenerateOtpClick = async (e) => {
 
-        console.log('handling generate otp click...');
+        console.log('handling generate otp click...',phone);
         const response = await fetch('/api/server/otp', {
             method: "POST",
             body: JSON.stringify({
                 phone,
-                purpose: 'Login'
+                purpose: 'Login',
             }),
             headers: {
 				'content-type': 'application/json'
@@ -33,19 +31,18 @@
         })
 
         const data = await response.json();
-        console.log('OTP DATA', data);
 
         if (data.Status === 'failure' || data.HttpCode !== 200) {
-            goto(`/patient/${patientId}/delete/confirm/status?code=${serverErrorMessage}`)
+            goto(`/patient/delete/confirm/status?code=${serverErrorMessage}`)
         } else {
             toast.success('OTP has been successfully generated!');
-            goto(`/patient/${patientId}/delete/confirm/?phone=${phone}&redirect=true`);
+            goto(`/patient/delete/confirm/?phone=${phone}`);
         }
     }
 
     const handleReenterOtpClick = () => {
         console.log('handling re enter otp click...');
-        goto(`/patient/${patientId}/delete/confirm/?phone=${phone}&redirect=true`);
+        goto(`/patient/delete/confirm/?phone=${phone}`);
     }
 </script>
 
