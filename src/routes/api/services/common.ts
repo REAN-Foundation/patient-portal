@@ -1,6 +1,7 @@
 import { SessionManager } from "../session.manager";
 import { API_CLIENT_INTERNAL_KEY, BACKEND_API_URL } from "$env/static/private";
 import { error } from "@sveltejs/kit";
+import chalk from 'chalk';
 
 export const delete_ = async (sessionId: string, url: string) => {
     console.log('Session Is at common ', sessionId);
@@ -40,4 +41,31 @@ export const post_ = async (sessionId: string, url: string, bodyObj: unknown) =>
     });
     const response = await res.json();
     return response;
+}
+
+export const get_ = async (sessionId: string, url: string) => {
+    const session = await SessionManager.getSession(sessionId);
+    const accessToken = session?.accessToken;
+    //console.log(`accessToken = ${accessToken}`);
+    const headers = {};
+    headers['Content-Type'] = 'application/json';
+    headers['x-api-key'] = API_CLIENT_INTERNAL_KEY;
+    headers['Authorization'] = `Bearer ${accessToken}`;
+    const res = await fetch(url, {
+        method: 'GET',
+        headers
+    });
+    const response = await res.json();
+    if (response.Status === 'failure') {
+        if (response.HttpCode === 404) {
+            console.log(chalk.red(`get_ response message: 404 - ${response.Message}`));
+            return null;
+        }
+        else if(response.HttpCode !== 200) {
+            console.log(chalk.red(`get_ response message: ${response.Message}`));
+            throw error(response.HttpCode, response.Message);
+        }
+    }
+    console.log(chalk.green(`get_ response message: ${response.Message}`));
+    return response.Data;
 }

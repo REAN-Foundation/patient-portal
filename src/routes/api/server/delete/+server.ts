@@ -13,7 +13,7 @@ export const DELETE = async (event: RequestEvent) => {
 	try {
 		response = await deletePatient(
             sessionId,
-            data.patientId
+            data.patientUserId
 		);
 		console.log('Delete Response ', response)
         if (response.Status === 'failure' || response.HttpCode !== 200) {

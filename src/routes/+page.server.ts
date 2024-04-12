@@ -15,6 +15,6 @@ export const actions = {
         if (response.Status == "failure" || response.HttpCode !== 200) {
             throw redirect('/', errorMessage(response.Message), event);
         }
-        throw redirect(`/patient/delete/confirm?phone=${countryCode}-${formData.phone as string}`, successMessage(response.Message), event);
+        throw redirect(`/users?phone=${countryCode}-${formData.phone as string}`, successMessage(response.Message), event);
 	}
 };

@@ -1,6 +1,6 @@
 import type { LoginModel } from "$lib/types/domain.models";
 import { API_CLIENT_INTERNAL_KEY, BACKEND_API_URL } from "$env/static/private";
-import { delete_, post_ } from "./common";
+import { delete_, get_, post_ } from "./common";
 
 export const loginWithOtp = async (otp: string, phone: string, loginRoleId: number = 2) => {
     const model: LoginModel = {
@@ -30,6 +30,11 @@ export const loginWithOtp = async (otp: string, phone: string, loginRoleId: numb
 export const deletePatient = async (sessionId: string, patientId: string) => {
     const url = BACKEND_API_URL + `/patients/${patientId}`;
     return await delete_(sessionId, url);
+}
+
+export const getPatientById = async (sessionId: string, patientId: string) => {
+    const url = BACKEND_API_URL + `/patients/${patientId}`;
+    return await get_(sessionId, url);
 }
 
 export const generateOtp = async (phone: string, purpose: string, loginRoleId?: number) => {

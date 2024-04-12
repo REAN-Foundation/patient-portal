@@ -14,11 +14,13 @@
         if (invalidOtp) {
             dispatch('reenterOtp');
         }
-        dispatch('home')
+        dispatch('home',{
+            statusCode: title
+        })
     }
 
     let buttonName: string = null;
-
+    let statusCode;
     if (generateOtp) {
         buttonName = 'Generate Otp';
     }
@@ -28,7 +30,8 @@
     }
 
     if (! generateOtp && ! invalidOtp) {
-        buttonName = "Home"
+        buttonName = "Home";
+        statusCode = title
     }
 
 </script>

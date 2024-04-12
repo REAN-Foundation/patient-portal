@@ -14,7 +14,7 @@
     export let data: PageServerData;
     $: statusCode = data.statusCode;
     $: phone = data.phone;
-
+    const patientUserId = data.patientUserId;
     $: console.log('STATUS CODE ',statusCode)
     const handleGenerateOtpClick = async (e) => {
 
@@ -47,10 +47,14 @@
 
     const handleHomeClick = (event) => {
         console.log('handling home click...');
+        // const result = event.detail.statusCode === 'cancel'
+        // console.log(result);
         if (event.detail.statusCode === 'cancel') {
-            goto(`/users/${}`);
+            goto(`/users/${patientUserId}/home`);
+        } else {
+            goto(`/`);
         }
-        goto(`/`);
+        
     }
 </script>
 
