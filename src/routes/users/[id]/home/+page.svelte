@@ -4,7 +4,7 @@
     import type { ModalSettings } from '@skeletonlabs/skeleton';
     import {PatientPortalHelper} from '$lib/utils/patient.portal.helper';
     import { getModalStore } from '@skeletonlabs/skeleton';
-    import { goto, invalidateAll } from '$app/navigation';
+    import { goto, invalidate, invalidateAll } from '$app/navigation';
 
     const modalStore = getModalStore();
 
@@ -65,6 +65,21 @@
         goto(`/users/${patientUserId}/status?code=cancel`);
 	};
 
+    const handleLogout = async () => {
+        console.log('Handling sign out click...');
+        const response = await fetch(`/api/server/logout`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' }
+		});
+
+		const resp = await response.text();
+		console.log(`resp: ${JSON.stringify(resp, null, 2)}`);
+		// LocalStorageUtils.removeItem('userRoles');
+        // invalidate('app');
+		window.location.href = '/';
+        // goto('/');
+    }
+
     const modal: ModalSettings = {
 		type: 'confirm',
 		title: 'Delete',
@@ -88,3 +103,4 @@
 <h1>This is home page of the user</h1>
 <h1>{JSON.stringify(data.user)}</h1>
 <button on:click={handleDelete}>Delete Account</button>
+<button on:click={handleLogout}>Logout</button>

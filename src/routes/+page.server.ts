@@ -1,7 +1,12 @@
-import type { RequestEvent } from '@sveltejs/kit';
+import type { RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import { generateOtp } from './api/services/user';
 import { redirect } from 'sveltekit-flash-message/server';
 import { errorMessage, successMessage } from '$lib/utils/message.utils';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async (event: ServerLoadEvent) => {
+	event.depends('app')
+};
 
 export const actions = {
 	generateOtp: async (event: RequestEvent) => {

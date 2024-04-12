@@ -56,3 +56,8 @@ export const generateOtp = async (phone: string, purpose: string, loginRoleId?: 
     const response = await res.json();
     return response;
 }
+
+export const logout = async (sessionId: string) => {
+	const url = BACKEND_API_URL + `/users/logout`;
+	return await post_(sessionId, url, {});
+};
