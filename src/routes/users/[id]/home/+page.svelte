@@ -70,17 +70,18 @@
 	};
 </script>
 <Modal background="bg-white text-black "/>
-<div class="bg-[#F3F4F6]">
+<div class="bg-[#F3F4F6] min-h-screen">
     <div class="absolute top-0 right-0 mt-2 mr-2">
       <button on:click={handleLogout} class="variant-filled-secondary text-white px-4 py-2 rounded-lg hover:border">Sign Out</button>
       <button on:click={handleDelete} class="variant-filled-secondary text-white px-4 py-2 rounded-lg ml-2 hover:border">Delete Account</button>
     </div>
-    <div class="variant-filled-secondary text-white py-4 text-center text-xl">
-      Welcome {data.user.DisplayName ? data.user.DisplayName : '' }
+    <div class="variant-filled-secondary text-white py-4 h-14 text-center text-xl ">
+      <!-- Welcome {data.user.DisplayName ? data.user.DisplayName : '' } -->
     </div>
     <div class="flex justify-center items-center min-h-screen mx-8">
       <div class="relative w-full md:max-w-lg bg-white rounded-xl overflow-hidden shadow-lg">
-        <div class="variant-filled-secondary text-white py-6 text-center text-xl">
+        <div class="variant-filled-secondary text-white py-4 text-center text-xl">
+          Welcome {data.user.DisplayName ? data.user.DisplayName : '' }
         </div>
         <div class="p-8 text-black">
           <table class="border-collapse w-full ">

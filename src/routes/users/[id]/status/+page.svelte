@@ -58,6 +58,10 @@
     }
 </script>
 
+
+  <div class="variant-filled-secondary text-white py-4 h-14 text-center text-xl">
+
+  </div>
 <div  >
     {#if statusCode === 'cancel'}
         <Status title={statusCode} on:home={handleHomeClick} message={thanksMessage}></Status>
