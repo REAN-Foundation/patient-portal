@@ -61,7 +61,7 @@
     <option value="+57">Colombia (+57)</option>
     <option value="+269">Comoros (+269)</option>
     <option value="+242">Congo (+242)</option>
-    <option value="+243">Congo,The Democratic Republic of the congo (+243)</option>
+    <!-- <option value="+243">Congo,The Democratic Republic of the congo (+243)</option> -->
     <option value="+682">Cook Islands (+682)</option>
     <option value="+506">Costa Rica (+506)</option>
     <option value="+225">Cote d'lvoire (+225)</option>
@@ -125,7 +125,7 @@
     <option value="+7">Kazakhstan (+7)</option>
     <option value="+254">Kenya (+254)</option>
     <option value="+686">Kiribati (+686)</option>
-    <option value="+850">Korea,Democratic People's Republic of Korea (+850)</option>
+    <!-- <option value="+850">Korea,Democratic People's Republic of Korea (+850)</option> -->
     <option value="+82">Korea, Republic of South Korea (+82)</option>
     <option value="+383">Kosovo (+383)</option>
     <option value="+965">Kuwait (+965)</option>

@@ -21,20 +21,6 @@ export const actions = {
 		const request = event.request;
         const data = Object.fromEntries(await request.formData());; // or .json(), or .text(), etc
         console.log('Form Data Input', data);
-
-        // const phone_ = data.has('phone') ? data.get('phone') : null;
-        // const otp_ = data.has('otp') ? data.get('otp') : null;
-        // // const loginRoleId_ = data.has('loginRoleId') ? data.get('loginRoleId') : null;
-
-        // if (!phone_ || !otp_) {
-        //     throw error(400, `Phone or OTP values are ill-formatted!`);
-        // }
-        // const otp = otp_.valueOf() as string;
-        // if (otp.length < 6) {
-        //     throw error(400, `Otp is not valid!`);
-        // }
-        // const phone = phone_.valueOf() as string;
-        // const loginRoleId = loginRoleId_.valueOf() as number;
         const otp = data.otp as string;
         const phone = data.phone as string;
         console.log('OTPPP: ' + otp);

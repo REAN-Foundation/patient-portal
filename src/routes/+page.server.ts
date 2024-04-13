@@ -12,6 +12,7 @@ export const actions = {
 	generateOtp: async (event: RequestEvent) => {
 		const request = event.request;
 		const formData = Object.fromEntries(await request.formData());
+        console.log('FORM DATA', formData);
         let countryCode = (formData.countryCode as string).trim();
         countryCode = countryCode.replace('+','');
         const phone = countryCode+'-'+formData.phone as string;

@@ -1,12 +1,6 @@
 <script lang="ts">
-    import { getModalStore } from '@skeletonlabs/skeleton';
-	import { Modal } from '@skeletonlabs/skeleton';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import type { PageServerData } from './$types';
-	import { goto, invalidateAll } from '$app/navigation';
 	import { enhance } from '$app/forms';
-    import {PatientPortalHelper} from '$lib/utils/patient.portal.helper';
-    import toast, { Toaster } from 'svelte-french-toast';
 	
     import {
 		getPublicLogoImageSource,
@@ -20,104 +14,24 @@
     
     export let data: PageServerData;
     let phone = data.phone;
-    let isConfirm = false;
-    const modalStore = getModalStore();
     let enteredOtp;
 
 	let otp = ['', '', '', '', '', ''];
-
-	// Array to hold references to OTP input elements
 	let otpInputs: Array<HTMLInputElement> = [];
 
     $:console.log(otp)
     $: enteredOtp = otp.join('');
     $: console.log('OTP input elements',enteredOtp);
     $: console.log('Enter OTP input', enteredOtp);
-	// Function to handle OTP input and auto-focus
-	const handleOtpInput = (index: number) => {
-		// Remove non-numeric characters from the input
-		otp[index] = otp[index].replace(/\D/g, '');
 
-		// Auto-focus on the next input if available
+	const handleOtpInput = (index: number) => {
+		otp[index] = otp[index].replace(/\D/g, '');
 		if (index < otpInputs.length - 1 && otp[index].length === 1) {
 			otpInputs[index + 1].focus();
 		}
 	};
-
-	const handleSubmit = async () => {
-		 modalStore.trigger(modal);
-	};
-
-	const handleConfirm = async (phone: string, otp: string) => {
-        console.log('handling on confirm .....')
-
-        // Do login with phone & otp and set cookies 
-        const response = await fetch(`/api/server/login`, {
-			method: 'POST',
-			body: JSON.stringify({
-                phone,
-                otp,
-            }),
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-
-        const data = await response.json();
-
-        console.log('Data',data);
-        if (data.Status === 'failure' || data.HttpCode !== 200) {
-            const status = PatientPortalHelper.getLoginStatus(data);
-            goto(`/patient/delete/confirm/status?phone=${phone}&code=${status}`)
-        } else {
-        //Perform Delete patient
-        let patientId = data.PatientUserId;
-        console.log('Patient Id',patientId);
-        const deleteResponse = await fetch(`/api/server/delete`, {
-			method: 'DELETE',
-			body: JSON.stringify({
-                patientId
-            }),
-			headers: {
-				'content-type': 'application/json'
-			}
-		});
-        const deletedData = await deleteResponse.json();
-
-        console.log('Deleted Data',deletedData);
-        const status = PatientPortalHelper.getPatientDeleteStatus(deletedData);
-        goto(`/patient/delete/confirm/status?code=${status}`);
-        }
- 	};
-
-	const handleCancel = () => {
-		console.log('Delete cancelled.');
-        goto(`/patient/delete/confirm/status?code=cancel`);
-	};
-
-	// Modal settings
-	const modal: ModalSettings = {
-		type: 'confirm',
-		title: 'Delete',
-		body: 'Please note that once the account is deleted, all the associated data for your account will also be removed.',
-
-		response: (clicked: boolean) => {
-			if (clicked) {
-                isConfirm = true;
-                console.log('Confirm clicked')
-				const otpValue = otp.join('');
-                handleConfirm(phone, otpValue);
- 			} else {
-                isConfirm = true;
-                console.log('Cancelled clicked')
-                handleCancel();
-           }
-		}
-	};
 </script>
 
-<!-- Svelte component structure -->
-<Modal background="bg-white text-black "/>
 <div class="nav h-12 w-full bg-primary-700"></div>
 <div class="w-full h-[92%]" id="background-image">
     <div class="bg-back-ground h-full w-full bg-primary-50">
@@ -137,7 +51,7 @@
 				>
 					<div class="justify-center w-full mt-5 h-50">
 						<label class="mb-2" for="phone">
-							<span class="text-primary-500">Mobile no :</span>
+							<span class="text-primary-500">Mobile Number</span>
 							<span class="label-text-alt" />
 						</label>
 						<input
@@ -152,9 +66,9 @@
                             readonly={phone !== ''}
                             required
                         />
-							<label class="mb-2" for="password">
+							<label class="mb-2 mt-2" for="password">
 								<div class="grid grid-flow-col">
-									<span class="text-left text-primary-500">Enter Otp :</span>
+									<span class="text-left text-primary-500">Enter OTP</span>
 								</div>
 							</label>
                             
