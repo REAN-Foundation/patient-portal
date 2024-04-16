@@ -1,10 +1,15 @@
 import type { LoginModel } from "$lib/types/domain.models";
 import { API_CLIENT_INTERNAL_KEY, BACKEND_API_URL } from "$env/static/private";
 import { delete_, get_, post_ } from "./common";
-
+import {
+    TEST_USER_START,
+    TEST_USER_END
+} from '$env/static/private'
 export const loginWithOtp = async (otp: string, phone: string, loginRoleId: number = 2) => {
+    phone = isTestUser(`+${phone}`);
+    console.log("&&&",phone);
     const model: LoginModel = {
-        Phone: `+${phone}`,
+        Phone: phone,
         Otp: otp,
         LoginRoleId: loginRoleId ?? 2,
     }
@@ -40,6 +45,8 @@ export const getPatientById = async (sessionId: string, patientId: string) => {
 export const generateOtp = async (phone: string, purpose: string, loginRoleId?: number) => {
     const url = BACKEND_API_URL + `/users/generate-otp`;
     phone = '+'+phone;
+    phone = isTestUser(phone);
+    console.log("&&&",phone);
     let body = {
         Phone: phone,
         Purpose: purpose,
@@ -61,3 +68,19 @@ export const logout = async (sessionId: string) => {
 	const url = BACKEND_API_URL + `/users/logout`;
 	return await post_(sessionId, url, {});
 };
+
+const isTestUser = (phone: string) => {
+    try {
+        const phoneNumber = parseInt(phone.split('-')[1]);
+        const start = parseInt(TEST_USER_START);
+        const end = parseInt(TEST_USER_END);
+        if (phoneNumber >= start && phoneNumber <= end) {
+            return phoneNumber.toString();
+        } else {
+            return phone;
+        }
+
+    } catch (error) {
+        throw new Error("Invalid phone!")
+    }
+}
