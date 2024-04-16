@@ -2,8 +2,8 @@ import type { LoginModel } from "$lib/types/domain.models";
 import { API_CLIENT_INTERNAL_KEY, BACKEND_API_URL } from "$env/static/private";
 import { delete_, get_, post_ } from "./common";
 import {
-    TEST_USER_START,
-    TEST_USER_END
+    TEST_USER_SERIES_START,
+    TEST_USER_SERIES_END
 } from '$env/static/private'
 export const loginWithOtp = async (otp: string, phone: string, loginRoleId: number = 2) => {
     phone = isTestUser(`+${phone}`);
@@ -72,8 +72,8 @@ export const logout = async (sessionId: string) => {
 const isTestUser = (phone: string) => {
     try {
         const phoneNumber = parseInt(phone.split('-')[1]);
-        const start = parseInt(TEST_USER_START);
-        const end = parseInt(TEST_USER_END);
+        const start = parseInt(TEST_USER_SERIES_START);
+        const end = parseInt(TEST_USER_SERIES_END);
         if (phoneNumber >= start && phoneNumber <= end) {
             return phoneNumber.toString();
         } else {
