@@ -1,38 +1,36 @@
 import type { Handle, HandleServerError } from '@sveltejs/kit';
-import { SessionManager } from './routes/api/session.manager';
+import { SessionManager } from './routes/api/sessions/session.manager';
 
 export const handle: Handle = async ({ event, resolve }) => {
-    console.log('Inside the handle hook.');
 	const sessionId = event.cookies.get('sessionId');
-    console.log('Session ID: ' + sessionId);
 	if (!sessionId) {
 		return await resolve(event);
 	}
 
-	//console.log(`session id received - ${sessionId}`);
-
-	let sessionUser;
+	let sessionUser = null;
 	const session = await SessionManager.getSession(sessionId);
-    console.log('Session get from sessiona manager ', session);
 	if (session) {
 		console.log(`session received`);
 		sessionUser = {
-			sessionId: session.sessionId,
-			userId: session.userId,
-			email: session.email,
-			username: session.username,
+			sessionId      : session.sessionId,
+            tenantId       : session.tenantId,
+            tenantCode     : session.tenantCode,
+            tenantName     : session.tenantName,
+			userId         : session.userId,
+			email          : session.email,
+			username       : session.username,
 			profileImageUrl: session.profileImageUrl,
-			fullName: session.fullName,
-			firstName: session.firstName,
-			roleId: session.roleId
+			fullName       : session.fullName,
+			firstName      : session.firstName,
+			roleId         : session.roleId,
+            roleName       : session.roleName
 		};
 	}
 
-    console.log('Sessions we have ',sessionUser);
 	if (sessionUser) {
 		event.locals.sessionUser = sessionUser;
 	}
-	console.log(`Returning from hooks`);
+	console.log(`returning from hooks`);
 	return await resolve(event);
 };
 

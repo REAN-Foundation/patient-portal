@@ -14,20 +14,27 @@ FROM node:20.11-alpine3.18
 RUN apk add bash
 RUN apk add --no-cache \
         python3 \
+        aws-cli \
     && rm -rf /var/cache/apk/*
 RUN apk add --update alpine-sdk
-RUN apk add chromium \
-    harfbuzz
 
 RUN apk update
 RUN apk upgrade
 
 WORKDIR /app
-RUN rm -rf ./*
+# RUN rm -rf ./*
 
-COPY --from=builder ./app/package*.json ./
-COPY --from=builder ./app/build .
+COPY --from=builder ./app/ ./
 
-RUN npm install --production
+RUN npm install
 
-CMD ["node", "index.js"]
+ARG ORIGIN
+ENV ORIGIN=${ORIGIN} 
+
+ARG ENVIRONMENT
+ENV ENVIRONMENT=${ENVIRONMENT}
+
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/bin/bash", "-c", "/app/entrypoint.sh $ENVIRONMENT"]
+
+# CMD ["node", "build/index.js"]

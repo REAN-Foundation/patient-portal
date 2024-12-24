@@ -1,63 +1,111 @@
-import type { LoginModel } from "$lib/types/domain.models";
-import { API_CLIENT_INTERNAL_KEY, BACKEND_API_URL } from "$env/static/private";
-import { delete_, get_, post_ } from "./common";
+import { BACKEND_API_URL } from '$env/static/private';
+import { CacheService } from '$lib/server/cache/cache.service';
+import { post_, get_, delete_, put_ } from './common';
 
-export const loginWithOtp = async (otp: string, phone: string, loginRoleId: number = 2) => {
-    const model: LoginModel = {
-        Phone: `+${phone}`,
-        Otp: otp,
-        LoginRoleId: loginRoleId ?? 2,
-    }
-    const headers = {};
-    headers['Content-Type'] = 'application/json';
-    headers['x-api-key'] = API_CLIENT_INTERNAL_KEY;
-    const body = JSON.stringify(model);
-    const url = BACKEND_API_URL + '/users/login-with-otp';
+///////////////////////////////////////////////////////////////////////////////
 
-    console.log(body);
-    console.log(url);
-    console.log(JSON.stringify(headers, null, 2));
-
-    const res = await fetch(url, {
-        method: 'POST',
-        body,
-        headers
-    });
-    const response = await res.json();
-    return response;
+export const generateOtp = async (phone: string, loginRoleId?: number, purpose?: string) => {
+	const url = BACKEND_API_URL + `/users/generate-otp`;
+	const body = {
+		Phone: phone,
+		RoleId: loginRoleId ? loginRoleId : 2,
+		Purpose: purpose ? purpose : 'Login'
+	};
+	return await post_(url, body);
 };
 
-export const deletePatient = async (sessionId: string, patientId: string) => {
-    const url = BACKEND_API_URL + `/patients/${patientId}`;
-    return await delete_(sessionId, url);
-}
+export const loginWithOtp = async (otp: string, phone: string, loginRoleId: number = 2) => {
+	const url = BACKEND_API_URL + `/users/login-with-otp`;
+	const body = {
+		Phone: phone,
+		Otp: otp,
+		LoginRoleId: loginRoleId ?? 2
+	};
+	return await post_(url, body);
+};
 
-export const getPatientById = async (sessionId: string, patientId: string) => {
-    const url = BACKEND_API_URL + `/patients/${patientId}`;
-    return await get_(sessionId, url);
-}
-
-export const generateOtp = async (phone: string, purpose: string, loginRoleId?: number) => {
-    const url = BACKEND_API_URL + `/users/generate-otp`;
-    phone = '+'+phone;
-    let body = {
-        Phone: phone,
-        Purpose: purpose,
-        RoleId: loginRoleId ? loginRoleId: 2
+export const getPatientById = async (
+	sessionId: string | undefined,
+	patientId: string | undefined
+) => {
+	const url = BACKEND_API_URL + `/patients/${patientId}`;
+	const cacheKey = `session-${sessionId}:req-getPatientById`;
+	if (await CacheService.has(cacheKey)) {
+        return await CacheService.get(cacheKey);
     }
-    const headers = {};
-    headers['Content-Type'] = 'application/json';
-    headers['x-api-key'] = API_CLIENT_INTERNAL_KEY;
-    const res = await fetch(url, {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers
-    });
-    const response = await res.json();
-    return response;
-}
+	const result = await get_(url, true, sessionId);
+	await CacheService.set(cacheKey, result);
+	return result;
+};
 
 export const logout = async (sessionId: string) => {
 	const url = BACKEND_API_URL + `/users/logout`;
-	return await post_(sessionId, url, {});
+	const result = await post_(url, {}, true, sessionId);
+	// const findAndClearKeys = [`req-getUserRoles`];
+	await CacheService.clear();
+	return result;
+};
+
+export const deletePatient = async (sessionId: string, patientId: string) => {
+	const url = BACKEND_API_URL + `/patients/${patientId}`;
+	const result = await delete_(url, true, sessionId);
+	const findAndClearKeys = [`req-getUserRoles`];
+	await CacheService.findAndClear(findAndClearKeys);
+	return result;
+};
+
+export const updatePatientById = async (
+	sessionId: string | undefined,
+	patientId: string | undefined,
+	firstName: string,
+	lastName: string,
+	gender: string,
+	birthDate: string,
+	maritalStatus: string,
+	email: string,
+	phone: string,
+	race: string,
+	ethnicity: string,
+	strokeSurvivorOrCaregiver: string,
+	workedPriorToStroke: boolean,
+	livingAlone: boolean,
+	addressLine: string,
+	city: string,
+	district: string,
+	state: string,
+	country: string,
+	postalcode: string,
+	imageresourceid: string
+) => {
+	console.log('in the user update living alone');
+	const body = {
+		FirstName: firstName ? firstName : null,
+		LastName: lastName ? lastName : null,
+		Gender: gender ? gender : null,
+		BirthDate: birthDate ? birthDate : null,
+		MaritalStatus: maritalStatus ? maritalStatus : null,
+		Email: email ? email : null,
+		Phone: phone ? phone : null,
+		Race: race ? race : null,
+		Ethnicity: ethnicity ? ethnicity : null,
+		StrokeSurvivorOrCaregiver: strokeSurvivorOrCaregiver ? strokeSurvivorOrCaregiver : null,
+		WorkedPriorToStroke:
+			workedPriorToStroke !== undefined && workedPriorToStroke !== null
+				? workedPriorToStroke
+				: null,
+		LivingAlone: livingAlone !== undefined && livingAlone !== null ? livingAlone : null,
+
+		AddressLine: addressLine ? addressLine : null,
+		City: city ? city : null,
+		District: district ? district : null,
+		State: state ? state : null,
+		Country: country ? country : null,
+		PostalCode: postalcode ? postalcode : null,
+		ImageResourceId: imageresourceid ? imageresourceid : null
+	};
+	console.log('in the user update', body);
+	const url = BACKEND_API_URL + `/patients/${patientId}`;
+	const findAndClearKeys = [`session-${sessionId}:req-getPatientById`];
+	await CacheService.findAndClear(findAndClearKeys)
+	return await put_(url, body, true, sessionId);
 };

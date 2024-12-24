@@ -9,16 +9,16 @@
         <Toast
           type={toast.type}
           dismissible={toast.dismissible}
-          on:dismiss={() => dismissToast(toast.id)}>{toast.message}</Toast
+          dismiss={() => dismissToast(toast.id)}>{toast.message}</Toast
         >
       {/each}
     </section>
   {/if}
 
-<style lang="postcss">
+<style>
 section {
     position: fixed;
-    top: 10%;
+    top: 0%;
     left: 0;
     right: 0;
     width: 100%;

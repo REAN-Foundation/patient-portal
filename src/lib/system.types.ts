@@ -6,71 +6,14 @@ export enum SystemTypes {
     Custom = 'Custom'
 }
 
-export interface FeatureOptions {
-    Name   : string;
-    Enabled: boolean;
-}
+export const REAN_PUBLIC_LOGO_IMAGE_SOURCE='https://www.reanfoundation.org/wp-content/uploads/2021/10/REAN-Foundation-brand-Logo.png';
+export const REAN_PUBLIC_FOOTER_TEXT='REAN Foundation';
+export const REAN_PUBLIC_FOOTER_LINK='https://www.reanfoundation.org';
+export const REAN_SYSTEM_NAME = 'REAN Foundation';
 
-export const UserRoles = [
-    {
-        RoleName : 'System admin',
-        id   : 1
-    },
-    {
-        RoleName : 'System user',
-        id   : 2
-    },
-    {
-        RoleName : 'Patient',
-        id   : 3
-    },
-    {
-        RoleName : 'Doctor',
-        id   : 4
-    },
-    {
-        RoleName : 'Lab user',
-        id   : 5
-    },
-    {
-        RoleName : 'Pharmacy user',
-        id   : 6
-    },
-    {
-        RoleName : 'Nurse',
-        id   : 7
-    },
-    {
-        RoleName : 'Ambulance service user',
-        id   : 8
-    },
-    {
-        RoleName : 'Social health worker',
-        id   : 9
-    },
-    {
-        RoleName : 'Patient family member',
-        id   : 10
-    },
-    {
-        RoleName : 'Patient friend',
-        id   : 11
-    },
-    {
-        RoleName : 'Donor',
-        id   : 12
-    },
-    {
-        RoleName : 'Volunteer',
-        id   : 13
-    },
-    {
-        RoleName : 'Tenant admin',
-        id   : 14
-    },
-    {
-        RoleName : 'Tenant user',
-        id   : 15
-    }
+export const AHA_PUBLIC_LOGO_IMAGE_SOURCE='https://www.heart.org/-/media/Images/Logos/Global-Do-No-Edit/Header/AHA_Full.svg?h=256&iar=0&mw=960&w=426&hash=502DC0C0397CFBA7EA1142C51E062876';
+export const AHA_PUBLIC_FOOTER_TEXT='American Heart Association'
+export const AHA_PUBLIC_FOOTER_LINK='https://www.heart.org'
+export const AHA_SYSTEM_NAME = 'American Heart Association';
 
-]
+
