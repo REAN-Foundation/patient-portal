@@ -188,7 +188,7 @@
 	@apply border appearance-none bg-secondary border-outline  text-info sm:text-sm rounded-md w-full px-3 py-2;
 }
 .mobileinput {
-	@apply border border-secondary  text-info  rounded-md w-full px-3 py-2 md:text-sm;
+    @apply border appearance-none bg-secondary border-outline  text-info  rounded-md w-full px-3 py-2 md:text-sm;
 }
 
 .inputotp {
