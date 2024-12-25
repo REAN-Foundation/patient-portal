@@ -48,16 +48,16 @@
 </script>
 
 {#if data.length > 0}
-	<div class="table-container">
+	<div class="table-container ">
 		<div class="table-wrapper">
 			<table class="w-full border-collapse text-sm">
-				<thead class="thead">
-					<tr>
-						<th class="th w-[5%]"></th>
+				<thead class="thead ">
+					<tr >
+						<th class="th w-[5%] "></th>
 						<th class="th w-[40%] lg:w-[15%]" on:click={sortByDate}>
 							<div class="flex items-center">
 								<span>Date</span>
-								<span class="sort-icon ">
+								<span class="sort-icon">
 									{#if sortOrder === 'ascending'}
 										<Icon icon="mdi:arrow-up" />
 									{:else}
@@ -67,7 +67,7 @@
 							</div>
 						</th>
 						{#if title == 'Blood Pressure'}
-							<th class="th w-[40%] lg:w-[15%]">Systolic ({data[0].unit})</th>
+							<th class="th w-[30%] lg:w-[15%]">Systolic ({data[0].unit})</th>
 							<th class="th">Diastolic ({data[0].unit})</th>
 						{:else}
 							<th class="th">{title} ({data[0].unit})</th>
@@ -80,7 +80,7 @@
 							<td class="td w-[5%]">{(currentPage - 1) * pageSize + index + 1}</td>
 							<td class="td w-[40%] lg:w-[15%]">{formatDateMonth(item.date)}</td>
 							{#if title == 'Blood Pressure'}
-								<td class="td w-[40%] lg:w-[15%]">{item.value}</td>
+								<td class="td w-[30%] lg:w-[15%]">{item.value}</td>
 								<td class="td">{item.value1}</td>
 							{:else}
 								<td class="td">{item.value}</td>
@@ -101,7 +101,7 @@
 				</select>
 				<div class="absolute inset-y-0 right-2 flex items-center pointer-events-none">
 					<Icon icon="mdi:chevron-down" class="text-info w-5 h-5 " />
-				  </div>
+				</div>
 			</div>
 
 			<div class="pagination-controls">

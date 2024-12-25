@@ -3,7 +3,9 @@ import { SessionManager } from '../sessions/session.manager';
 import { error } from '@sveltejs/kit';
 import { ServerHelper } from '$lib/server/server.helper';
 import axios from 'axios';
-import { get_ } from './common';
+import * as fs from 'fs';
+import FormData from 'form-data';
+import { get_, delete_ } from './common';
 
 ////////////////////////////////////////////////////////////////
 
@@ -34,9 +36,6 @@ export const uploadBinary = async (
 		headers: headers,
 		data: buffer
 	};
-
-	// console.log(JSON.stringify(config, null, 2));
-
 	const res = await axios(config);
 
 	const response = res.data;
@@ -52,50 +51,39 @@ export const uploadBinary = async (
 	return response;
 };
 
-// export const upload = async (sessionId: string, filePath: string, filename: string, isPublic = true) => {
 
-//     const url = BACKEND_API_URL + `/file-resources/upload`;
-//     const session = await SessionManager.getSession(sessionId);
-//     const accessToken = session.accessToken;
+export const upload= async (sessionId: string, filePath: string, filename: string, isPublic = true) => {
 
-// 	const mimeType = ServerHelper.getMimeTypeFromFileName(filename);
-// 	console.log(`mimeType = ${mimeType}`);
+    const url = BACKEND_API_URL + `/file-resources/upload`;
+    const session = await SessionManager.getSession(sessionId);
+    const accessToken = session.accessToken;
 
-//     const p = path.join(process.cwd(), filePath);
-//     const form = new FormData();
-//     form.append("name", fs.readFileSync(p));
-//     //form.append("IsPublicResource", isPublic ? "true" : "false");
-//     console.log(filePath);
+	const mimeType = ServerHelper.getMimeTypeFromFileName(filename);
+	console.log(`mimeType = ${mimeType}`);
+    const p = filePath;
+    const form = new FormData();
+	form.append("name", fs.createReadStream(p));
+    form.append("IsPublicResource", isPublic ? "true" : "false");
+    console.log(filePath);
 
-//     const headers = {
-//         ...form.getHeaders()
-//     };
-//     //headers['enc'] = 'multipart/form-data';
-//     // headers['Content-Type'] = "application/x-www-form-urlencoded";
-//     headers['x-api-key'] = API_CLIENT_INTERNAL_KEY;
-//     headers['Authorization'] = `Bearer ${accessToken}`;
+    const headers = {
+        'Content-Type' : 'multipart/form-data',
+        'x-api-key' : API_CLIENT_INTERNAL_KEY,
+        'Authorization' : `Bearer ${accessToken}`,
+    };
+    console.log(form);
+    const res = await axios.post(url, form, { headers });
+    const response = res.data;
 
-//     // const config = {
-//     //     method: 'post',
-//     //     url: url,
-//     //     headers: headers,
-//     // };
+    if (response['Status'] === 'failure') {
+        if(response['HttpCode'] !== 201 && response['HttpCode'] !== 200) {
+            console.log(`get_ response message: ${response['Message']}`);
+            throw error(response['HttpCode'], response['Message']);
+        }
+    }
 
-//     console.log(JSON.stringify(headers, null, 2));
-//     console.log(form);
-
-//     const response = await axios.post(url, form, headers);
-
-//     if (response['Status'] === 'failure') {
-//         if(response['HttpCode'] !== 201 && response['HttpCode'] !== 200) {
-//             console.log(`get_ response message: ${response['Message']}`);
-//             throw error(response['HttpCode'], response['Message']);
-//         }
-//     }
-
-//     console.log(`get_ response message: ${response['Message']}`);
-//     return response['Data'];
-// };
+    return response;
+};
 
 export const getFileResourceById = async (sessionId, fileResourceId) => {
 	const url = BACKEND_API_URL + `file-resources/${fileResourceId}`;
@@ -105,7 +93,7 @@ export const getFileResourceById = async (sessionId, fileResourceId) => {
 export const deleteFileResource = async (sessionId: string, resourceId: string) => {
 	const url = BACKEND_API_URL + `/file-resources/${resourceId}`;
 	console.log('uri--', url);
-	return await del_(sessionId, url, true, API_CLIENT_INTERNAL_KEY);
+	return await delete_( url, true, sessionId);
 };
 
 export const download = async (sessionId, fileResourceId, asAttachment = false) => {
@@ -177,3 +165,4 @@ export function downloadAsAttachment(response) {
 
 	document.body.appendChild(a);
 }
+

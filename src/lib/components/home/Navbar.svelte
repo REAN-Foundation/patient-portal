@@ -49,7 +49,7 @@
 		{
 			label: 'Sign Out',
 			icon: 'material-symbols:logout',
-			action: openLogoutModal,
+			action: openLogoutModal
 		},
 		{
 			label: 'Delete Account',
@@ -153,12 +153,11 @@
 					if (showUserMenu) showThemeMenu = false;
 				}}
 			>
-			{#if imageUrl}
-				<Image cls="initial-icon" source={imageUrl} w=24 h=24 />
-			{:else}
-			 <span class="initial-icon">{userInitials}</span>
-			{/if}
-				
+				{#if imageUrl}
+					<Image cls="initial-icon" source={imageUrl} w="24" h="24" />
+				{:else}
+					<span class="initial-icon">{userInitials}</span>
+				{/if}
 			</button>
 			{#if showUserMenu}
 				<div class="user-menu">
@@ -170,9 +169,9 @@
 							{userInitials}
 						</div> -->
 						{#if imageUrl}
-						<Image cls="initial-icon" source={imageUrl} w=24 h=24 />
+							<Image cls="initial-icon" source={imageUrl} w="24" h="24" />
 						{:else}
-						<div class="initial-icon">{userInitials}</div>
+							<div class="initial-icon">{userInitials}</div>
 						{/if}
 						<span>{userName}</span>
 					</div>
@@ -216,7 +215,7 @@
 							{#each themeModes as theme}
 								<div class="flex flex-col items-center">
 									<button
-										class={`relative px-10 py-5 sm:px-8 sm:py-4 rounded-lg border-2 ${
+										class={`relative  px-8 py-4 rounded-md border-2 ${
 											theme === selectedMode
 												? 'border-[var(--theme-border-color)]'
 												: 'border-transparent'
@@ -234,7 +233,6 @@
 								</div>
 							{/each}
 						</div>
-						
 					</div>
 
 					<hr class="theme-divider" />

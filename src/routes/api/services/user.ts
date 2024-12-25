@@ -49,8 +49,7 @@ export const logout = async (sessionId: string) => {
 export const deletePatient = async (sessionId: string, patientId: string) => {
 	const url = BACKEND_API_URL + `/patients/${patientId}`;
 	const result = await delete_(url, true, sessionId);
-	const findAndClearKeys = [`req-getUserRoles`];
-	await CacheService.findAndClear(findAndClearKeys);
+	await CacheService.clear();
 	return result;
 };
 
