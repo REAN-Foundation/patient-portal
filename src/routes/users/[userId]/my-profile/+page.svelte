@@ -76,7 +76,7 @@
 		const fileSize = file.size;
 		if (fileSize > MAX_FILE_SIZE) {
 			errorMessage.Text = 'File should be less than 150 KB';
-			errorMessage.Colour = 'text-error-500';
+			errorMessage.Colour = 'text-info';
 			profileImage.value = null;
 			return;
 		}
@@ -88,45 +88,8 @@
 			};
 			reader.readAsDataURL(file);
 		}
-
-		errorMessage.Text = 'Please wait, file upload is in progress';
-		errorMessage.Colour = 'text-error-500';
-
-		const formData = new FormData();
-		formData.append('file', file);
-		formData.append('filename', file.name);
-
-		try {
-			const res = await fetch(`/api/server/file-resources/upload`, {
-				method: 'POST',
-				body: formData
-			});
-
-			if (!res.ok) {
-				const errorText = await res.text();
-				throw new Error(errorText);
-			}
-			const response = await res.json();
-			if (response.Status === 'success' && response.HttpCode === 201) {
-				errorMessage.Text = 'File uploaded successfully';
-				errorMessage.Colour = 'text-success-500';
-				const imageResourceId_ = response.Data.FileResources[0].id;
-				console.log('ImageResource', imageResourceId_);
-				if (imageResourceId_) {
-					imageResourceId = imageResourceId_;
-					return true;
-				}
-				console.log('imageResourceId', imageResourceId);
-			} else {
-				errorMessage.Text = response.Message;
-				errorMessage.Colour = 'text-error-500';
-			}
-		} catch (error) {
-			console.error('Error uploading file:', error);
-			errorMessage.Text = 'Error uploading file: ' + error.message;
-			errorMessage.Colour = 'text-error-500';
-		}
 	};
+	
 </script>
 
 <form action="?/updateprofile" method="post" enctype="multipart/form-data">
@@ -144,6 +107,7 @@
 								<label for="fileinput" class="absolute camera-icon" title="Update Image">
 									<Icon icon="ant-design:camera-outlined" class="h-6 w-6" />
 								</label>
+								
 							{:else if imageUrl !== undefined}
 								<Image source={imageUrl} w="36" h="36" cls="profile-image" />
 								<label for="fileinput" class="absolute camera-icon" title="Update Image">
@@ -166,9 +130,13 @@
 								type="file"
 								class="hidden"
 								accept="image/*"
+								name="file"
 								on:change={onFileSelected}
 							/>
 						</div>
+						{#if errorMessage && errorMessage.Text}
+						<p class={errorMessage.Colour}>{errorMessage.Text}</p>
+					{/if}
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
 					{#if form?.errors?.imageResourceId}
@@ -242,9 +210,13 @@
 								type="file"
 								class="hidden"
 								accept="image/*"
+								name="file"
 								on:change={onFileSelected}
 							/>
 						</div>
+						{#if errorMessage && errorMessage.Text}
+						<p class={errorMessage.Colour}>{errorMessage.Text}</p>
+					{/if}
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
 					{#if form?.errors?.imageResourceId}
