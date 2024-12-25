@@ -85,10 +85,10 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
             plugins: {
                 title: {
                     display: true,
-                    text: 'Tasks by Category Over Time',
+                    text: 'Tasks by category over Time',
                     font: {
                         size: 16,
-                        weight: 'semi-bold'
+                        weight: 'bold'
                     },
                     padding: 20
                 },

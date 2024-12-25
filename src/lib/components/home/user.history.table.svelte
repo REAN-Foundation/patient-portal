@@ -68,8 +68,8 @@
 				</thead>
 				<tbody class="tbody">
 					{#each paginatedData as task, index}
-						<tr class="tabledata">
-							<td class="td w-[5%]">{(currentPage - 1) * pageSize + index + 1}</td>
+						<tr class="tabledata  ">
+							<td class="td w-[5%] ">{(currentPage - 1) * pageSize + index + 1}</td>
 							<td class="td w-[40%] lg:w-[15%]">{formatDateMonth(task.date)}</td>
 							<td class="td lg:w-[20%]">{task.category}</td>
 							<td class="td">{task.count}</td>
