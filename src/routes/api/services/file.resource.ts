@@ -4,7 +4,7 @@ import { error } from '@sveltejs/kit';
 import { ServerHelper } from '$lib/server/server.helper';
 import axios from 'axios';
 import * as fs from 'fs';
-import FormData from 'Form-Data';
+import FormData from 'form-data';
 import { get_, delete_ } from './common';
 
 ////////////////////////////////////////////////////////////////
