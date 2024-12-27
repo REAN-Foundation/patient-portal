@@ -242,7 +242,7 @@
 }
 
 .initial-icon {
-	@apply w-10 h-10 rounded-full  bg-secondary  text-info flex items-center justify-center  uppercase text-sm;
+	@apply w-10 h-10 rounded-full  bg-secondary  text-info flex items-center justify-center  uppercase text-sm border border-outline;
 }
 .user-menu-item {
 	@apply flex items-center w-full px-4 py-2 text-info  hover:bg-active;
@@ -546,9 +546,13 @@ tbody tr {
 }
 
 .camera-icon {
-	@apply -bottom-2 -right-2 md:bottom-0 md:right-0 bg-secondary text-info p-2 rounded-full cursor-pointer flex items-center justify-center;
+	@apply -bottom-2 -right-2 md:bottom-0 md:right-0 bg-secondary text-info p-2 rounded-full cursor-pointer flex items-center justify-center border border-outline;
 }
 
 .profile-image {
 	@apply h-24 w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 rounded-full object-cover;
+}
+
+.display-name {
+	@apply mb-1 text-info text-sm font-medium;
 }

@@ -76,11 +76,11 @@
 		const fileSize = file.size;
 		if (fileSize > MAX_FILE_SIZE) {
 			errorMessage.Text = 'File should be less than 150 KB';
-			errorMessage.Colour = 'text-info';
+			errorMessage.Colour = 'error-text';
 			profileImage.value = null;
 			return;
 		}
-
+		errorMessage.Text = null;
 		if (file) {
 			const reader = new FileReader();
 			reader.onload = () => {
@@ -99,7 +99,7 @@
 			<div>
 				<h2 class="personal-Info">Personal Information</h2>
 				<p class=" text-info">Your personal information and account security settings.</p>
-				<div class="flex items-center mt-7">
+				<div class="hidden md:flex items-center mt-7">
 					<div class="profile-container flex flex-col items-center gap-4">
 						<div class="relative hidden md:flex justify-center items-center">
 							{#if previewImage !== null}
@@ -116,7 +116,7 @@
 							{:else}
 								<label for="fileinput" class="cursor-pointer">
 									<div
-										class="bg-secondary text-info h-36 w-36 rounded-full flex items-center justify-center text-3xl my-4"
+										class="bg-secondary text-info h-24 w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 rounded-full flex items-center justify-center text-3xl my-4 border border-outline"
 									>
 										{initials}
 									</div>
@@ -137,6 +137,10 @@
 						{#if errorMessage && errorMessage.Text}
 						<p class={errorMessage.Colour}>{errorMessage.Text}</p>
 					{/if}
+					<div class ="flex flex-col">
+						<span class="display-name">{personObject.DisplayName || 'Unknown'}</span>
+						<span class="display-name ">{phone}</span>
+					</div>
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
 					{#if form?.errors?.imageResourceId}
@@ -145,7 +149,7 @@
 				</div>
 			</div>
 			<div class="col-span-3 mx-6">
-				<div class="flex items-center">
+				<div class="flex md:hidden items-center">
 					<!-- <div class="profile-container flex items-center gap-4">
 						{#if imageUrl === undefined}
 							<label for="fileinput" class="cursor-pointer">
@@ -196,7 +200,7 @@
 							{:else}
 								<label for="fileinput" class="cursor-pointer">
 									<div
-										class="bg-secondary text-info h-36 w-36 rounded-full flex items-center justify-center text-3xl my-4"
+										class="bg-secondary text-info h-24 w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 rounded-full flex items-center justify-center text-3xl my-4 border border-outline"
 									>
 										{initials}
 									</div>
@@ -213,10 +217,16 @@
 								name="file"
 								on:change={onFileSelected}
 							/>
+						
 						</div>
 						{#if errorMessage && errorMessage.Text}
 						<p class={errorMessage.Colour}>{errorMessage.Text}</p>
-					{/if}
+						{/if}
+						<div class ="flex flex-col">
+							<span class="display-name">{personObject.DisplayName || 'Unknown'}</span>
+							<span class="display-name">{phone}</span>
+						</div>
+						
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
 					{#if form?.errors?.imageResourceId}
