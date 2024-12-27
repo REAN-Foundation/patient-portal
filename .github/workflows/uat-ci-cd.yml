@@ -95,6 +95,16 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
+      - name: Copy env file
+        run: aws s3 cp s3://${{ secrets.ENV_FILE_BUCKET_PATH }}/.env ./.env
+
+      - name: Copy constant file
+        run: aws s3 cp s3://${{ secrets.CONSTANT_FILE_BUCKET_PATH }}/constants.ts ./src/lib
+
+      - name: Copy constant file
+        run: aws s3 cp s3://${{ secrets.FAVICON_FILE_BUCKET }}/favicon.png ./static/favicon.png
+        
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
