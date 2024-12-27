@@ -80,7 +80,7 @@
 			profileImage.value = null;
 			return;
 		}
-
+		errorMessage.Text = null;
 		if (file) {
 			const reader = new FileReader();
 			reader.onload = () => {
