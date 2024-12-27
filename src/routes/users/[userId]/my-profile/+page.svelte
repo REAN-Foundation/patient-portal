@@ -137,6 +137,10 @@
 						{#if errorMessage && errorMessage.Text}
 						<p class={errorMessage.Colour}>{errorMessage.Text}</p>
 					{/if}
+					<div class ="flex flex-col">
+						<span class="display-name">{personObject.DisplayName || 'Unknown'}</span>
+						<span class="display-name ">{phone}</span>
+					</div>
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
 					{#if form?.errors?.imageResourceId}
@@ -213,10 +217,16 @@
 								name="file"
 								on:change={onFileSelected}
 							/>
+						
 						</div>
 						{#if errorMessage && errorMessage.Text}
 						<p class={errorMessage.Colour}>{errorMessage.Text}</p>
-					{/if}
+						{/if}
+						<div class ="flex flex-col">
+							<span class="display-name">{personObject.DisplayName || 'Unknown'}</span>
+							<span class="display-name">{phone}</span>
+						</div>
+						
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
 					{#if form?.errors?.imageResourceId}
