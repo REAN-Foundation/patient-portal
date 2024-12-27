@@ -76,7 +76,7 @@
 		const fileSize = file.size;
 		if (fileSize > MAX_FILE_SIZE) {
 			errorMessage.Text = 'File should be less than 150 KB';
-			errorMessage.Colour = 'text-info';
+			errorMessage.Colour = 'error-text';
 			profileImage.value = null;
 			return;
 		}
@@ -99,7 +99,7 @@
 			<div>
 				<h2 class="personal-Info">Personal Information</h2>
 				<p class=" text-info">Your personal information and account security settings.</p>
-				<div class="flex items-center mt-7">
+				<div class="hidden md:flex items-center mt-7">
 					<div class="profile-container flex flex-col items-center gap-4">
 						<div class="relative hidden md:flex justify-center items-center">
 							{#if previewImage !== null}
@@ -145,7 +145,7 @@
 				</div>
 			</div>
 			<div class="col-span-3 mx-6">
-				<div class="flex items-center">
+				<div class="flex md:hidden items-center">
 					<!-- <div class="profile-container flex items-center gap-4">
 						{#if imageUrl === undefined}
 							<label for="fileinput" class="cursor-pointer">
