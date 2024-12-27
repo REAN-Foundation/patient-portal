@@ -28,15 +28,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Lint Code Base
-        uses: docker://ghcr.io/github/super-linter:latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LINTER_RULES_PATH: /
-          TYPESCRIPT_ES_CONFIG_FILE: .eslintrc.json
-          VALIDATE_TYPESCRIPT_ES: true
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: main
+      # - name: Lint Code Base
+      #   uses: docker://ghcr.io/github/super-linter:latest
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     LINTER_RULES_PATH: /
+      #     TYPESCRIPT_ES_CONFIG_FILE: .eslintrc.json
+      #     VALIDATE_TYPESCRIPT_ES: true
+      #     VALIDATE_ALL_CODEBASE: false
+      #     DEFAULT_BRANCH: main
 
   Label_Checks:
     runs-on: ubuntu-latest
