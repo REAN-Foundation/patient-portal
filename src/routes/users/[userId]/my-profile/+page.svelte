@@ -116,7 +116,7 @@
 							{:else}
 								<label for="fileinput" class="cursor-pointer">
 									<div
-										class="bg-secondary text-info h-36 w-36 rounded-full flex items-center justify-center text-3xl my-4"
+										class="bg-secondary text-info h-24 w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 rounded-full flex items-center justify-center text-3xl my-4 border border-outline"
 									>
 										{initials}
 									</div>
@@ -200,7 +200,7 @@
 							{:else}
 								<label for="fileinput" class="cursor-pointer">
 									<div
-										class="bg-secondary text-info h-36 w-36 rounded-full flex items-center justify-center text-3xl my-4"
+										class="bg-secondary text-info h-24 w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 rounded-full flex items-center justify-center text-3xl my-4 border border-outline"
 									>
 										{initials}
 									</div>
