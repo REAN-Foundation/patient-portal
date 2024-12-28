@@ -270,7 +270,7 @@
 						</div>
 					</div>
 				</div>
-				<div>
+				<!-- <div>
 					<label class="label" for="BirthDate">Date Of Birth</label>
 					<input
 						type="date"
@@ -280,7 +280,7 @@
 						class=" input "
 						bind:value={formattedDateOfBirth}
 					/>
-				</div>
+				</div> -->
 				<div>
 					<label class="label" for="MaritalStatus">Marital Status</label>
 					<div class="relative">
