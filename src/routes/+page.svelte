@@ -124,7 +124,7 @@
 					</div>
 				{/if}
 
-				<button type="submit" class="btn w-full">Generate Otp</button>
+				<button type="submit" class="btn w-full">Generate OTP</button>
 
 				<!-- <p class="para">
 					Don’t have an account?
