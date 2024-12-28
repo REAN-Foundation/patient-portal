@@ -8,12 +8,19 @@
 	} from '$lib/utils.ts/functions';
 	import Image from '$lib/components/image.svelte';
 	import Icon from '@iconify/svelte';
+	import { browser } from '$app/environment';
+	import { db } from '$lib/utils.ts/local.db';
+	import { invalidate } from '$app/navigation';
+	import { page } from '$app/stores';
+	import ConfirmModal from '$lib/components/modal/confirm.modal.svelte';
 
 	///////////////////////////////////////////////////////////////////////////
 
 	export let form;
 	export let data: PageServerData;
 
+	$: data;
+	const userId = $page.params.userId;
 	const addressObject = data.healthProfile.Patient.User.Person.Addresses;
 
 	const personObject = data.healthProfile.Patient.User.Person;
@@ -78,7 +85,7 @@
 		if (fileSize > MAX_FILE_SIZE) {
 			errorMessage.Text = 'File should be less than 150 KB';
 			errorMessage.Colour = 'error-text';
-			fileInput.value = ''; 
+			fileInput.value = '';
 			return;
 		}
 		errorMessage.Text = null;
@@ -90,7 +97,52 @@
 			reader.readAsDataURL(file);
 		}
 	};
-	
+
+	const onDeleteImage = async () => {
+		const response = await fetch(
+			`/api/server/file-resources/delete?imageResourceId=${imageResourceId}`,
+			{
+				method: 'DELETE',
+				headers: { 'content-type': 'application/json' }
+			}
+		);
+
+		const resp = await response.text();
+		const model = {
+			ImageResourceId: imageResourceId,
+			sessionId: data.sessionId,
+			userId: userId
+		};
+
+		const response2 = await fetch(`/api/server/user/update-profile-image`, {
+			method: 'POST',
+			body: JSON.stringify(model),
+			headers: { 'content-type': 'application/json' }
+		});
+		const url = imageUrl.toLowerCase();
+		if (browser) {
+			try {
+				await db.imageCache.where({ srcUrl: url }).delete();
+				console.log(`Deleted image from cache: ${url}`);
+			} catch (error) {
+				console.error('Error deleting image from cache:', error);
+			}
+		}
+
+		invalidate('app:my-profile');
+	};
+
+	let showDeleteButton = false;
+	let showModal = false;
+
+	const openModal = () => {
+		showModal = true;
+	};
+
+	const closeModal = () => {
+		showModal = false;
+		showDeleteButton = false;
+	};
 </script>
 
 <form action="?/updateprofile" method="post" enctype="multipart/form-data">
@@ -102,13 +154,17 @@
 				<p class=" text-info">Your personal information and account security settings.</p>
 				<div class="hidden md:flex items-center mt-7">
 					<div class="profile-container flex flex-col items-center gap-4">
-						<div class="relative hidden md:flex justify-center items-center">
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<div
+							class="relative hidden md:flex justify-center items-center"
+							on:mouseenter={() => (showDeleteButton = true)}
+							on:mouseleave={() => (showDeleteButton = false)}
+						>
 							{#if previewImage !== null}
 								<img src={previewImage} alt="Preview" class="profile-image" />
 								<label for="fileinput" class="absolute camera-icon" title="Update Image">
 									<Icon icon="ant-design:camera-outlined" class="h-6 w-6" />
 								</label>
-								
 							{:else if imageUrl !== undefined}
 								<Image source={imageUrl} w="36" h="36" cls="profile-image" />
 								<label for="fileinput" class="absolute camera-icon" title="Update Image">
@@ -135,14 +191,32 @@
 								on:change={onFileSelected}
 								bind:this={fileInput}
 							/>
+							{#if showDeleteButton && imageResourceId !== undefined}
+								<button
+									class="absolute -top-2 left-2 text-error-500 bg-white p-1 rounded-full shadow hover:bg-error-100"
+									on:click|preventDefault={openModal}
+								>
+									<label class="camera-icon" title="Delete Image">
+										<Icon icon="mdi:close" class="h-4 w-4" />
+									</label>
+								</button>
+								<ConfirmModal
+									bind:show={showModal}
+									title="Delete Image"
+									message="Are you sure you want to delete this image? This action cannot be undone."
+									confirmButtonText="Delete"
+									close={closeModal}
+									confirm={onDeleteImage}
+								/>
+							{/if}
 						</div>
 						{#if errorMessage && errorMessage.Text}
-						<p class={errorMessage.Colour}>{errorMessage.Text}</p>
-					{/if}
-					<div class ="flex flex-col">
-						<span class="display-name">{personObject.DisplayName || 'Unknown'}</span>
-						<span class="display-name ">{phone}</span>
-					</div>
+							<p class={errorMessage.Colour}>{errorMessage.Text}</p>
+						{/if}
+						<div class="flex flex-col">
+							<span class="display-name">{personObject.DisplayName || 'Unknown'}</span>
+							<span class="display-name">{phone}</span>
+						</div>
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
 					{#if form?.errors?.imageResourceId}
@@ -220,16 +294,14 @@
 								on:change={onFileSelected}
 								bind:this={fileInput}
 							/>
-						
 						</div>
 						{#if errorMessage && errorMessage.Text}
-						<p class={errorMessage.Colour}>{errorMessage.Text}</p>
+							<p class={errorMessage.Colour}>{errorMessage.Text}</p>
 						{/if}
-						<div class ="flex flex-col">
+						<div class="flex flex-col">
 							<span class="display-name">{personObject.DisplayName || 'Unknown'}</span>
 							<span class="display-name">{phone}</span>
 						</div>
-						
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
 					{#if form?.errors?.imageResourceId}
@@ -440,7 +512,7 @@
 					</div>
 				</div>
 
-				<div class="flex justify-end ">
+				<div class="flex justify-end">
 					<button class="save-changes" type="submit"> Save changes </button>
 				</div>
 			</div>

@@ -108,3 +108,18 @@ export const updatePatientById = async (
 	await CacheService.findAndClear(findAndClearKeys)
 	return await put_(url, body, true, sessionId);
 };
+
+export const updateProfileImage = async (
+	sessionId: string | undefined,
+	userId: string | undefined,
+	imageresourceId: string
+) => {
+	const body = {
+		ImageResourceId: imageresourceId ? imageresourceId : null
+	};
+	console.log('in the user update', body);
+	const url = BACKEND_API_URL + `/users/update-profile-image/${userId}`;
+	const findAndClearKeys = [`session-${sessionId}:req-getPatientById`];
+	await CacheService.findAndClear(findAndClearKeys)
+	return await put_(url, body, true, sessionId);
+};

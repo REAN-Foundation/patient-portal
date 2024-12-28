@@ -1,4 +1,4 @@
-import { error, type RequestEvent } from '@sveltejs/kit';
+import { error, type RequestEvent, type ServerLoadEvent } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { zfd } from 'zod-form-data';
@@ -10,8 +10,9 @@ import { upload} from '$routes/api/services/file.resource';
 
 ///////////////////////////////////////////////////////////////////////////////
 
-export const load: PageServerLoad = async (event: RequestEvent) => {
+export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 	try {
+		event.depends('app:my-profile');
 		const sessionId = event.cookies.get('sessionId');
 		const userId = event.params.userId;
 		const response = await getPatientById(sessionId, userId);
