@@ -70,7 +70,7 @@
 		Text: '',
 		Colour: 'border-b-surface-700'
 	};
-	const MAX_FILE_SIZE = 1024 * 100;
+	const MAX_FILE_SIZE = 1024 * 150;
 
 	const onFileSelected = async (e) => {
 		const file = (e.target as HTMLInputElement).files?.[0];
