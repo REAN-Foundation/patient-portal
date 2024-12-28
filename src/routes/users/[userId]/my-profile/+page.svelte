@@ -63,21 +63,22 @@
 		postalCode = firstAddress.PostalCode || '';
 	}
 
-	let profileImage;
 	let previewImage = null;
+	let fileInput: HTMLInputElement;
 
 	let errorMessage = {
 		Text: '',
 		Colour: 'border-b-surface-700'
 	};
-	const MAX_FILE_SIZE = 1024 * 150;
+	const MAX_FILE_SIZE = 1024 * 100;
+
 	const onFileSelected = async (e) => {
-		let file = e.target.files[0];
+		const file = (e.target as HTMLInputElement).files?.[0];
 		const fileSize = file.size;
 		if (fileSize > MAX_FILE_SIZE) {
 			errorMessage.Text = 'File should be less than 150 KB';
 			errorMessage.Colour = 'error-text';
-			profileImage.value = null;
+			fileInput.value = ''; 
 			return;
 		}
 		errorMessage.Text = null;
@@ -132,6 +133,7 @@
 								accept="image/*"
 								name="file"
 								on:change={onFileSelected}
+								bind:this={fileInput}
 							/>
 						</div>
 						{#if errorMessage && errorMessage.Text}
@@ -216,6 +218,7 @@
 								accept="image/*"
 								name="file"
 								on:change={onFileSelected}
+								bind:this={fileInput}
 							/>
 						
 						</div>
