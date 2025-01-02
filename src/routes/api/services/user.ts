@@ -109,7 +109,7 @@ export const updatePatientById = async (
 	return await put_(url, body, true, sessionId);
 };
 
-export const updateProfileImage = async (
+export const deleteProfileImage = async (
 	sessionId: string | undefined,
 	userId: string | undefined,
 	imageresourceId: string
@@ -118,7 +118,7 @@ export const updateProfileImage = async (
 		ImageResourceId: imageresourceId ? imageresourceId : null
 	};
 	console.log('in the user update', body);
-	const url = BACKEND_API_URL + `/users/update-profile-image/${userId}`;
+	const url = BACKEND_API_URL + `/users/${userId}/profile-image`;
 	const findAndClearKeys = [`session-${sessionId}:req-getPatientById`];
 	await CacheService.findAndClear(findAndClearKeys)
 	return await put_(url, body, true, sessionId);

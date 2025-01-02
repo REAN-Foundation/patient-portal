@@ -20,6 +20,7 @@
 	export let data: PageServerData;
 
 	$: data;
+	$:console.log('data----',data);
 	const userId = $page.params.userId;
 	const addressObject = data.healthProfile.Patient.User.Person.Addresses;
 
@@ -28,6 +29,7 @@
 
 	const displayName = personObject.DisplayName;
 	const initials = getInitials(displayName);
+	const MAX_FILE_SIZE = 1024 * 150;
 
 	let firstname = personObject.FirstName || '';
 	let lastname = personObject.LastName || '';
@@ -72,12 +74,13 @@
 
 	let previewImage = null;
 	let fileInput: HTMLInputElement;
+	let showDeleteButton = false;
+	let showModal = false;
 
 	let errorMessage = {
 		Text: '',
 		Colour: 'border-b-surface-700'
 	};
-	const MAX_FILE_SIZE = 1024 * 150;
 
 	const onFileSelected = async (e) => {
 		const file = (e.target as HTMLInputElement).files?.[0];
@@ -98,43 +101,94 @@
 		}
 	};
 
-	const onDeleteImage = async () => {
-		const response = await fetch(
+	const deleteFileResource = async () => {
+	 	await fetch(
 			`/api/server/file-resources/delete?imageResourceId=${imageResourceId}`,
 			{
 				method: 'DELETE',
-				headers: { 'content-type': 'application/json' }
+				headers: { 'Content-Type': 'application/json' },
 			}
 		);
-
-		const resp = await response.text();
-		const model = {
-			ImageResourceId: imageResourceId,
-			sessionId: data.sessionId,
-			userId: userId
-		};
-
-		const response2 = await fetch(`/api/server/user/update-profile-image`, {
-			method: 'POST',
-			body: JSON.stringify(model),
-			headers: { 'content-type': 'application/json' }
-		});
-		const url = imageUrl.toLowerCase();
-		if (browser) {
-			try {
-				await db.imageCache.where({ srcUrl: url }).delete();
-				console.log(`Deleted image from cache: ${url}`);
-			} catch (error) {
-				console.error('Error deleting image from cache:', error);
-			}
-		}
-
-		invalidate('app:my-profile');
+		console.log('File resource deleted successfully.');
 	};
 
-	let showDeleteButton = false;
-	let showModal = false;
+	const deleteImageFromCache = async () => {
+		if (!browser) return;
+		const url = imageUrl.toLowerCase();
+		try {
+			await db.imageCache.where({ srcUrl: url }).delete();
+			console.log(`Deleted image from cache: ${url}`);
+		} catch (error) {
+			console.error('Error deleting image from cache:', error);
+		}
+	};
 
+	const deleteProfileImage = async (model: { ImageResourceId: string; sessionId: string; userId: string }) => {
+		await fetch(`/api/server/user/delete-profile-image`, {
+			method: 'POST',
+			body: JSON.stringify(model),
+			headers: { 'Content-Type': 'application/json' },
+		});
+		console.log('Profile image deleted successfully.');
+	};
+
+	const onDeleteImage = async () => {
+		try {
+			showModal = false;
+			await deleteFileResource();
+			await deleteImageFromCache();
+			const model = {
+				ImageResourceId: imageResourceId,
+				sessionId: data.sessionId,
+				userId: userId,
+			};
+			await deleteProfileImage(model);
+			invalidate('app:my-profile');
+		} catch (error) {
+			console.error('Error occurred while deleting image:', error);
+		}
+	};
+
+	// const onDeleteImage = async () => {
+	// 	try {
+	// 		const fileResourceResponse = await fetch(
+	// 			`/api/server/file-resources/delete?imageResourceId=${imageResourceId}`,
+	// 			{
+	// 				method: 'DELETE',
+	// 				headers: { 'content-type': 'application/json' }
+	// 			}
+	// 		);
+
+	// 		await fileResourceResponse.text();
+
+	// 		const model = {
+	// 			ImageResourceId: imageResourceId,
+	// 			sessionId: data.sessionId,
+	// 			userId: userId
+	// 		};
+
+	// 		const url = imageUrl.toLowerCase();
+	// 		if (browser) {
+	// 			try {
+	// 				await db.imageCache.where({ srcUrl: url }).delete();
+	// 				console.log(`Deleted image from cache: ${url}`);
+	// 			} catch (error) {
+	// 				console.error('Error deleting image from cache:', error);
+	// 			}
+	// 		}
+
+	// 		const profileImageDelete = await fetch(`/api/server/user/delete-profile-image`, {
+	// 			method: 'POST',
+	// 			body: JSON.stringify(model),
+	// 			headers: { 'content-type': 'application/json' }
+	// 		});
+
+	// 		invalidate('app:my-profile');
+	// 	} catch (error) {
+	// 		console.error('Error occurred while deleting image:', error);
+	// 	}
+	// };
+	
 	const openModal = () => {
 		showModal = true;
 	};
@@ -226,41 +280,6 @@
 			</div>
 			<div class="col-span-3 mx-6">
 				<div class="flex md:hidden items-center">
-					<!-- <div class="profile-container flex items-center gap-4">
-						{#if imageUrl === undefined}
-							<label for="fileinput" class="cursor-pointer">
-								<div class="profile-icon">
-									{initials}
-								</div>
-							</label>
-							<input
-								id="fileinput"
-								name="fileinput"
-								type="file"
-								class="hidden"
-								placeholder="Image"
-								on:change={async (e) => await onFileSelected(e)}
-							/>
-						{:else}
-							<label for="fileinput" class="cursor-pointer">
-								<Image cls="h-36 w-36 rounded-full" source={imageUrl} w="36" h="36" />
-							</label>
-							<input
-								id="fileinput"
-								name="fileinput"
-								type="file"
-								class="hidden"
-								bind:this={profileImage}
-								placeholder="Image"
-								on:change={async (e) => await onFileSelected(e)}
-							/>
-						{/if}
-						<div class ="flex flex-col">
-							<span class="text-lg text-info">{personObject.DisplayName || 'Unknown'}</span>
-							<span class="text-info opacity-50">{phone}</span>
-						</div>
-					
-					</div> -->
 					<div class="profile-container flex flex-col items-center gap-4">
 						<div class="relative flex md:hidden justify-center items-center">
 							{#if previewImage !== null}

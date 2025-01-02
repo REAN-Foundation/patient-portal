@@ -17,6 +17,7 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
 		const userId = event.params.userId;
 		const response = await getPatientById(sessionId, userId);
 		const healthProfile = response.Data;
+		console.log('Health Profile: ' + JSON.stringify(healthProfile, null, 2));
 		return {
 			healthProfile,
 			sessionId

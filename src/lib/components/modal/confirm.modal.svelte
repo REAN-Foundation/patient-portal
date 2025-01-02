@@ -15,7 +15,7 @@
 			<p class="modal-message">{message}</p>
 			<div class="modal-actions">
 				<button class="cancel-btn" on:click={close}> Cancel </button>
-				<button class="confirm-btn" on:click={confirm}> {confirmButtonText} </button>
+				<button class="confirm-btn" on:click|preventDefault={confirm}> {confirmButtonText} </button>
 			</div>
 		</div>
 	</div>
