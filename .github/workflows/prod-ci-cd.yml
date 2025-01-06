@@ -76,13 +76,13 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Copy env file
-        run: aws s3 cp s3://${{ secrets.ENV_FILE_BUCKET_PATH }}/.env ./.env
+        run: aws s3 cp s3://${{ secrets.ENV_FILE_BUCKET_PATH }}.env ./.env
 
       - name: Copy constant file
-        run: aws s3 cp s3://${{ secrets.CONSTANT_FILE_BUCKET_PATH }}/constants.ts ./src/lib
+        run: aws s3 cp s3://${{ secrets.CONSTANT_FILE_BUCKET_PATH }}constants.ts ./src/lib
 
       - name: Copy favicon file
-        run: aws s3 cp s3://${{ secrets.FAVICON_FILE_BUCKET }}/favicon.png ./static/favicon.png
+        run: aws s3 cp s3://${{ secrets.FAVICON_FILE_BUCKET }}favicon.png ./static/favicon.png
       
       - name: Build and push
         id: docker_build
