@@ -15,7 +15,7 @@ const home: TabDefinition = {
 const careplan: TabDefinition = {
     name: 'Careplan',
     path: `/users/userId/careplan`,
-    icon: 'mdi:clipboard-text',
+    icon: 'material-symbols:add-notes-outline-rounded',
     default: true,
 };
 
