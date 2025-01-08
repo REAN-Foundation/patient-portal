@@ -8,7 +8,7 @@ on:
     #   Tag_name:
     #     description: Tag name of your release(please include "v")
     #     required: true
-
+#added aha-uat ECR Repo
 jobs:
 
   Publish-Release:
