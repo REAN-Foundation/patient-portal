@@ -9,6 +9,8 @@ on:
     #     description: Tag name of your release(please include "v")
     #     required: true
 #added aha-uat ECR Repo
+#added favicon.png
+
 jobs:
 
   Publish-Release:
