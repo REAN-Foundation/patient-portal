@@ -574,7 +574,7 @@ tbody tr {
 }
 
 .camera-icon {
-	@apply -bottom-2 -right-2 md:bottom-0 md:right-0 bg-secondary text-info p-2 rounded-full cursor-pointer flex items-center justify-center;
+	@apply -bottom-2 -right-2 md:bottom-0 md:right-0 bg-secondary text-info p-2 rounded-full cursor-pointer flex items-center justify-center border border-outline;
 }
 
 .profile-image {
