@@ -92,7 +92,7 @@ jobs:
               ORIGIN=${{ env.ORIGIN }}
               ENVIRONMENT=aha-uat
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/ahaprod-patient-portal:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/patient_portal_aha_uat:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -110,7 +110,7 @@ jobs:
         with:
             task-definition: task-definition.json
             container-name: default
-            image: ${{ steps.login-ecr.outputs.registry }}/ahaprod-patient-portal:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
+            image: ${{ steps.login-ecr.outputs.registry }}/patient_portal_aha_uat:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
