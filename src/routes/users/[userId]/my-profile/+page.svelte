@@ -13,6 +13,7 @@
 
 	export let form;
 	export let data: PageServerData;
+	console.log('form------',form)
 
 	const addressObject = data.healthProfile.Patient.User.Person.Addresses;
 
@@ -65,30 +66,28 @@
 
 	let previewImage = null;
 	let fileInput: HTMLInputElement;
-
+	const MAX_FILE_SIZE = 1024 * 150;
 	let errorMessage = {
 		Text: '',
 		Colour: 'border-b-surface-700'
 	};
-	const MAX_FILE_SIZE = 1024 * 150;
 
-	const onFileSelected = async (e) => {
-		const file = (e.target as HTMLInputElement).files?.[0];
+	const onFileSelected = async (e: Event) => {
+		const input = e.target as HTMLInputElement;
+    	const file = input.files?.[0];
 		const fileSize = file.size;
 		if (fileSize > MAX_FILE_SIZE) {
 			errorMessage.Text = 'File should be less than 150 KB';
 			errorMessage.Colour = 'error-text';
-			fileInput.value = ''; 
+			input.value = ''; 
 			return;
 		}
 		errorMessage.Text = null;
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = () => {
-				previewImage = reader.result;
-			};
-			reader.readAsDataURL(file);
-		}
+		const reader = new FileReader();
+		reader.onload = () => {
+			previewImage = reader.result;
+		};
+		reader.readAsDataURL(file);
 	};
 	
 </script>
