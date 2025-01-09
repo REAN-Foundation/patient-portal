@@ -1,28 +1,28 @@
 <script lang="ts">
 	import Icon from '@iconify/svelte';
 	import ConfirmModal from '../modal/confirm.modal.svelte';
+	import { onMount } from 'svelte';
 	import { getPublicLogoImageSource } from '../themes/theme.selector';
 	import Image from '$lib/components/image.svelte';
-
-	///////////////////////////////////////////////////////////////////////////
 
 	export let logout;
 	export let userId: string | undefined;
 	export let deleteAccount: () => void;
 	export let imageUrl: string | undefined;
 	export let userName: string;
+
 	let showConfirmDelete_ = false;
 	let showConfirmLogout_ = false;
 	$: showModal = showConfirmDelete_ || showConfirmLogout_;
 
 	const deleteMessage_ =
-		'Are you sure you want to delete your account? ' +
-		'This action is irreversible, and all associated data will be permanently removed.';
+		'Are you sure you want to delete your account? This action is irreversible, and all associated data will be permanently removed.';
 	const logoutMessage_ = 'Are you sure you want to sign out?';
 	$: deleteMessage = deleteMessage_;
 	$: logoutMessage = logoutMessage_;
 	let showUserMenu = false;
 	let showThemeMenu = false;
+
 	const themeModes = ['Light', 'Dark'];
 	const themeOptions = [
 		{ name: 'Blue', color: 'rgba(0, 150, 255, 0.1)', borderColor: 'rgba(0, 150, 255, 1)' },
@@ -41,33 +41,22 @@
 			icon: 'material-symbols:person-outline',
 			href: `/users/${userId}/my-profile`
 		},
-		{
-			label: 'Themes',
-			icon: 'mdi:palette-outline'
-		},
-
-		{
-			label: 'Sign Out',
-			icon: 'material-symbols:logout',
-			action: openLogoutModal
-		},
-		{
-			label: 'Delete Account',
-			icon: 'ic:baseline-delete-forever',
-			action: openDeleteModal
-		}
+		{ label: 'Themes', icon: 'mdi:palette-outline' },
+		{ label: 'Sign Out', icon: 'material-symbols:logout', action: openLogoutModal },
+		{ label: 'Delete My Account', icon: 'tabler:trash', action: openDeleteModal }
 	];
 
 	const logoImageSource = getPublicLogoImageSource();
 
 	const handleModeChange = (theme: string) => {
 		selectedMode = theme;
-		document.documentElement.setAttribute('data-theme', theme.toLowerCase());
+		localStorage.setItem('themeMode', theme);
 		applyThemeOption();
 	};
 
 	const handleOptionChange = (option: string) => {
 		selectedOption = option;
+		localStorage.setItem('themeOption', option); 
 		applyThemeOption();
 	};
 
@@ -75,31 +64,29 @@
 		const theme = selectedMode.toLowerCase();
 		const option = selectedOption.toLowerCase();
 
-		// Update root attributes
 		document.documentElement.setAttribute('data-theme', theme);
 		document.documentElement.setAttribute('data-theme-option', option);
 
-		// Dynamically update custom CSS properties for border colors
 		const themeOption = themeOptions.find((opt) => opt.name.toLowerCase() === option);
 		if (themeOption) {
 			document.documentElement.style.setProperty('--theme-border-color', themeOption.borderColor);
 		}
 	};
 
-	// function openModal() {
-	// 	showModal = true;
-	// }
+	onMount(() => {
+		const storedMode = localStorage.getItem('themeMode');
+		const storedOption = localStorage.getItem('themeOption');
 
-	// function handleDeleteConfirm() {
-	// 	if (deleteAccount) {
-	// 		deleteAccount();
-	// 	}
-	// 	showModal = false;
-	// }
+		if (storedMode) {
+			selectedMode = storedMode;
+			document.documentElement.setAttribute('data-theme', storedMode.toLowerCase());
+		}
 
-	// function handleDeleteCancel() {
-	// 	showModal = false;
-	// }
+		if (storedOption) {
+			selectedOption = storedOption;
+			applyThemeOption();
+		}
+	});
 
 	function openDeleteModal() {
 		showConfirmDelete_ = true;
@@ -110,16 +97,18 @@
 	}
 
 	function handleDeleteConfirm() {
-		if (deleteAccount) {
-			deleteAccount();
-		}
+		if (deleteAccount) deleteAccount();
 		showConfirmDelete_ = false;
 	}
 
 	function handleLogoutConfirm() {
-		if (logout) {
-			logout();
-		}
+		selectedMode = 'Light';
+		selectedOption = '';
+		localStorage.setItem('themeMode', 'Light');
+		localStorage.removeItem('themeOption');
+		applyThemeOption();
+
+		if (logout) logout();
 		showConfirmLogout_ = false;
 	}
 
@@ -131,6 +120,7 @@
 	const closeThemeMenu = () => {
 		showThemeMenu = false;
 	};
+
 	const userInitials = userName
 		.split(' ')
 		.map((word) => word[0])
@@ -188,8 +178,9 @@
 								<Icon icon={item.icon} class="menu-icon" />
 								<span>{item.label}</span>
 							</button>
-						{:else if item.label === 'Delete Account'}
-							<button class="user-menu-item" on:click={item.action}>
+							<hr class="user-menu-divider" />
+						{:else if item.label === 'Delete My Account'}
+							<button class="delete-my-acc" on:click={item.action}>
 								<Icon icon={item.icon} class="menu-icon" />
 								<span>{item.label}</span>
 							</button>

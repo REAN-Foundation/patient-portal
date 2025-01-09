@@ -24,7 +24,8 @@
 		{#if title == 'Height'}
 			<LineChart data={value} labels={date} {title} />
 		{:else if title == 'Weight'}
-			<BarChart dataSource={value} labels={date} {title} />
+			<!-- <BarChart dataSource={value} labels={date} {title} /> -->
+			<LineChart data={value} labels={date} {title} />
 		{:else if title == 'Blood Pressure'}
 			<JoinLineChart data1={value} data2={value1} labels={date} {title} />
 		{:else if title == 'Glucose'}
