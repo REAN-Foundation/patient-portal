@@ -181,14 +181,39 @@
 	@apply appearance-none border bg-secondary text-info   border-outline text-xs sm:text-sm rounded-md px-4 py-1 pr-8;
 }
 .selectcode {
-	@apply appearance-none border border-outline rounded-md  px-4 py-2 md:text-sm text-info  min-w-max pr-8;
+	@apply appearance-none cursor-pointer border border-outline rounded-md  px-4 py-2 md:text-sm text-info  min-w-max pr-8;
+}
+.select-box {
+	@apply relative;
+}
+.sel {
+	@apply w-full h-9 appearance-none px-3 rounded border border-outline cursor-pointer outline-none text-sm;
+}
+
+.select-box::after {
+	content: '';
+	position: absolute;
+	z-index: 1;
+	width: 8px;
+	height: 8px;
+	border-right: 1px solid var(--info-color);
+	border-bottom: 1px solid var(--info-color);
+	transform: rotate(45deg);
+	right: 16px;
+	top: 50%;
+	margin-top: -7px;
+	pointer-events: none;
+}
+.sel:focus {
+	border-color: var(--outline-color);
 }
 
 .input {
 	@apply border appearance-none bg-secondary border-outline  text-info sm:text-sm rounded-md w-full px-3 py-2;
 }
+
 .mobileinput {
-    @apply border appearance-none bg-secondary border-outline  text-info  rounded-md w-full px-3 py-2 md:text-sm;
+	@apply border appearance-none bg-secondary border-outline  text-info  md:text-sm  rounded-md w-full px-3 py-2;
 }
 
 .inputotp {
@@ -197,7 +222,7 @@
 .otp-expires {
 	@apply text-info text-xs sm:text-sm text-center my-4;
 }
-.resend-otp{
+.resend-otp {
 	@apply text-info text-xs sm:text-sm text-center my-4;
 }
 .label {
@@ -242,10 +267,13 @@
 }
 
 .initial-icon {
-	@apply w-10 h-10 rounded-full  bg-secondary  text-info flex items-center justify-center  uppercase text-sm border border-outline;
+	@apply w-10 h-10 rounded-full border border-outline  bg-secondary  text-info flex items-center justify-center  uppercase text-sm;
 }
 .user-menu-item {
 	@apply flex items-center w-full px-4 py-2 text-info  hover:bg-active;
+}
+.delete-my-acc {
+	@apply text-error flex items-center w-full px-4 py-2   hover:bg-active;
 }
 .user-menu-item.delete-account {
 	@apply text-error bg-transparent border-none cursor-pointer;
@@ -257,7 +285,7 @@
 	@apply border-outline;
 }
 .menu-icon {
-	@apply mr-2;
+	@apply mr-2 w-5 h-5;
 }
 
 .theme-menu {
@@ -287,13 +315,13 @@
 }
 
 .sidebar {
-	@apply w-16 border-r border-outline sm:w-56 min-h-screen bg-secondary  text-info px-4 sm:px-8 py-4 fixed top-14 left-0;
+	@apply w-16 border-r border-outline sm:w-56 min-h-screen bg-secondary  text-info px-4  py-4 fixed top-14 left-0;
 }
 .sidebar-list {
-	@apply space-y-2 sm:ml-4;
+	@apply space-y-2;
 }
 .sidebar-item {
-	@apply flex items-center hover:bg-primary border-outline px-2 py-2 rounded-md;
+	@apply flex  hover:bg-primary border-outline px-2 py-2 rounded-md;
 }
 .sidebar-item span {
 	@apply ml-2;
@@ -317,7 +345,7 @@
 	@apply bg-active;
 }
 .tasks {
-	@apply justify-between sm:justify-start space-x-6 sm:space-x-2 xl:space-x-3  text-sm sm:text-base my-3 mx-2 sm:mx-8 flex flex-row text-center ;
+	@apply justify-between sm:justify-start space-x-6 sm:space-x-2 xl:space-x-3  text-sm sm:text-base my-3 mx-2 sm:mx-8 flex flex-row text-center;
 }
 .activetasks {
 	@apply space-y-2 sm:space-y-0 sm:space-x-2 xl:space-x-3 mx-2 sm:mx-8 sm:text-base flex flex-col md:flex-row text-sm;
@@ -332,8 +360,8 @@
 .thead {
 	@apply sticky top-0 text-sm sm:text-base  sm:text-info text-info bg-secondary  table w-full table-fixed  border-t  border-l border-r border-outline;
 }
-.table-wrapper{
-	@apply  rounded-lg;
+.table-wrapper {
+	@apply rounded-lg;
 }
 .tabledata {
 	@apply text-center text-sm border border-secondary text-info;
@@ -551,8 +579,4 @@ tbody tr {
 
 .profile-image {
 	@apply h-24 w-24 md:h-28 md:w-28 lg:h-32 lg:w-32 rounded-full object-cover;
-}
-
-.display-name {
-	@apply mb-1 text-info text-sm font-medium;
 }

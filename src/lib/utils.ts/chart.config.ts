@@ -1,21 +1,17 @@
 import type { ChartConfiguration } from 'chart.js';
 import { format, parseISO } from "date-fns";
-
 ///////////////////////////////////////////////////////////////////////////////
 export interface ChartDataPoint {
     x: string;
     y: number;
 }
-
 export interface Dataset {
     label: string;
     data: ChartDataPoint[];
 }
-
 export interface ProcessedChartData {
     datasets: Dataset[];
 }
-
 // Simple random color generator
 function getRandomColor(): string {
     const letters = '0123456789ABCDEF';
@@ -25,7 +21,6 @@ function getRandomColor(): string {
     }
     return color;
 }
-
 export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConfiguration {
     // Generate a new random color for each dataset
     const enhancedDatasets = chartData.datasets.map(dataset => ({
@@ -39,7 +34,6 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
         fill: false,
         clip: false
     }));
-
     return {
         type: 'line',
         data: {
@@ -62,7 +56,7 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         text: 'Date'
                     },
                     grid: {
-                        color: '#E5E5E5'
+                        // color: '#E5E5E5'
                     }
                 },
                 y: {
@@ -78,7 +72,7 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                     min: 0,
                     max: Math.ceil(Math.max(...enhancedDatasets.flatMap(d => d.data.map(point => point.y)))),
                     grid: {
-                        color: '#E5E5E5'
+                        // color: '#E5E5E5'
                     }
                 }
             },
