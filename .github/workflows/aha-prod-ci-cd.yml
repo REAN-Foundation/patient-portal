@@ -63,7 +63,7 @@ jobs:
 
       - name: Copy constant file
         run: aws s3 cp s3://${{ secrets.CONSTANT_FILE_BUCKET_PATH }}/constants.ts ./src/lib
-        
+
       - name: Copy favicon file
         run: aws s3 cp s3://${{ secrets.FAVICON_FILE_BUCKET }}/favicon.png ./static/favicon.png
 
@@ -99,7 +99,7 @@ jobs:
           image: public.ecr.aws/i9y2d4u3/ahaprod-patient-portal:${{ needs.Publish-Release.outputs.release_name }}_${{ needs.Publish-Release.outputs.release_id }}
 
       - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           wait-for-service-stability: true
