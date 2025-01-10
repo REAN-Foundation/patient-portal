@@ -10,7 +10,7 @@
 	import Icon from '@iconify/svelte';
 	import { browser } from '$app/environment';
 	import { db } from '$lib/utils.ts/local.db';
-	import { invalidate } from '$app/navigation';
+	import { afterNavigate, invalidate } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/modal/confirm.modal.svelte';
 
@@ -142,51 +142,12 @@
 				userId: userId,
 			};
 			await deleteProfileImage(model);
-			invalidate('app:my-profile');
+			// invalidate('app:my-profile');
+			window.location.href = `/users/${userId}/my-profile`;
 		} catch (error) {
 			console.error('Error occurred while deleting image:', error);
 		}
 	};
-
-	// const onDeleteImage = async () => {
-	// 	try {
-	// 		const fileResourceResponse = await fetch(
-	// 			`/api/server/file-resources/delete?imageResourceId=${imageResourceId}`,
-	// 			{
-	// 				method: 'DELETE',
-	// 				headers: { 'content-type': 'application/json' }
-	// 			}
-	// 		);
-
-	// 		await fileResourceResponse.text();
-
-	// 		const model = {
-	// 			ImageResourceId: imageResourceId,
-	// 			sessionId: data.sessionId,
-	// 			userId: userId
-	// 		};
-
-	// 		const url = imageUrl.toLowerCase();
-	// 		if (browser) {
-	// 			try {
-	// 				await db.imageCache.where({ srcUrl: url }).delete();
-	// 				console.log(`Deleted image from cache: ${url}`);
-	// 			} catch (error) {
-	// 				console.error('Error deleting image from cache:', error);
-	// 			}
-	// 		}
-
-	// 		const profileImageDelete = await fetch(`/api/server/user/delete-profile-image`, {
-	// 			method: 'POST',
-	// 			body: JSON.stringify(model),
-	// 			headers: { 'content-type': 'application/json' }
-	// 		});
-
-	// 		invalidate('app:my-profile');
-	// 	} catch (error) {
-	// 		console.error('Error occurred while deleting image:', error);
-	// 	}
-	// };
 	
 	const openModal = () => {
 		showModal = true;
@@ -196,6 +157,7 @@
 		showModal = false;
 		showDeleteButton = false;
 	};
+
 </script>
 
 <form action="?/updateprofile" method="post" enctype="multipart/form-data">
@@ -246,11 +208,11 @@
 							/>
 							{#if showDeleteButton && imageResourceId !== undefined}
 								<button
-									class="absolute -top-2 left-2 text-error-500 bg-white p-1 rounded-full shadow hover:bg-error-100"
+									class="absolute -top-2 left-2 text-error-500 p-1 rounded-full shadow hover:bg-error-100"
 									on:click|preventDefault={openModal}
 								>
 									<label class="camera-icon" title="Delete Image">
-										<Icon icon="mdi:close" class="h-4 w-4" />
+										<Icon icon="mdi:close" class="h-5 w-5" />
 									</label>
 								</button>
 								<ConfirmModal
@@ -280,7 +242,11 @@
 			<div class="col-span-3 mx-6">
 				<div class="flex md:hidden items-center">
 					<div class="profile-container flex flex-col items-center gap-4">
-						<div class="relative flex md:hidden justify-center items-center">
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<div class="relative flex md:hidden justify-center items-center"
+							on:mouseenter={() => (showDeleteButton = true)}
+							on:mouseleave={() => (showDeleteButton = false)}
+						>
 							{#if previewImage !== null}
 								<img src={previewImage} alt="Preview" class="profile-image" />
 								<label for="fileinput" class="absolute camera-icon" title="Update Image">
@@ -312,6 +278,24 @@
 								on:change={onFileSelected}
 								bind:this={fileInput}
 							/>
+							{#if showDeleteButton && imageResourceId !== undefined}
+								<button
+									class="absolute -top-2 left-2 text-error-500 p-1 rounded-full shadow hover:bg-error-100"
+									on:click|preventDefault={openModal}
+								>
+									<label class="camera-icon" title="Delete Image">
+										<Icon icon="mdi:close" class="h-4 w-4" />
+									</label>
+								</button>
+								<ConfirmModal
+									bind:show={showModal}
+									title="Delete Image"
+									message="Are you sure you want to delete this image? This action cannot be undone."
+									confirmButtonText="Delete"
+									close={closeModal}
+									confirm={onDeleteImage}
+								/>
+							{/if}
 						</div>
 						{#if errorMessage && errorMessage.Text}
 							<p class={errorMessage.Colour}>{errorMessage.Text}</p>
