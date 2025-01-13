@@ -6,7 +6,7 @@
 	export let title: string;
 
 	let currentPage = 1;
-	let pageSize = 8;
+	let pageSize = 5;
 	let sortOrder = 'ascending';
 	let sortedData = [...data];
 	$: sortedData = [...data].sort((a, b) => {

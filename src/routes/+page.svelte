@@ -32,7 +32,7 @@
 
 <section class="section min-h-screen flex flex-col">
 	<div class="absolute top-4 left-4 flex items-center">
-		<img src={logoImageSource} alt="Logo" class="px-4" width="100" height="100" />
+		<img src={logoImageSource} alt="Logo" class="px-4 w-32 h-auto"/>
 		<!-- <h1 class="heading">Patient Portal</h1> -->
 	</div>
 
