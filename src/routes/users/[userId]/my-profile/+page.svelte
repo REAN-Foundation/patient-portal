@@ -98,7 +98,7 @@
 		<div class="grid grid-cols-4 gap-8">
 			<div>
 				<h2 class="personal-Info">Personal Information</h2>
-				<p class=" text-info">Your personal information and account security settings.</p>
+				<p class="text-info">Your personal information and account security settings.</p>
 				<div class="hidden md:flex items-center mt-7">
 					<div class="profile-container flex flex-col items-center gap-4">
 						<div class="relative hidden md:flex justify-center items-center">
@@ -140,7 +140,7 @@
 					{/if}
 					<div class ="flex flex-col">
 						<span class="display-name">{personObject.DisplayName || 'Unknown'}</span>
-						<span class="display-name ">{phone}</span>
+						<span class="display-name">{phone}</span>
 					</div>
 					</div>
 					<input type="hidden" name="imageResourceId" value={imageResourceId} />
