@@ -9,12 +9,12 @@ import { errorMessage, successMessage } from '$lib/utils.ts/message.utils';
 export const POST = async (event: RequestEvent) => {
     const request = event.request;
 	const data = await request.json();
-  		const response = await deleteProfileImage(
-			data.sessionId,
-            data.userId,
-			data.ImageResourceId,
-		);
-   console.log("inside the update profile image api",data);
+    const response = await deleteProfileImage(
+        data.sessionId,
+        data.userId,
+        data.ImageResourceId,
+    );
+   console.log("inside the update profile image api",response);
     if (response.Status == 'failure' || response.HttpCode !== 200) {
         throw redirect(errorMessage(response.Message), event);
     }

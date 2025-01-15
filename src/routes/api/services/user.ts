@@ -121,5 +121,6 @@ export const deleteProfileImage = async (
 	const url = BACKEND_API_URL + `/users/${userId}/profile-image`;
 	const findAndClearKeys = [`session-${sessionId}:req-getPatientById`];
 	await CacheService.findAndClear(findAndClearKeys)
-	return await put_(url, body, true, sessionId);
+	const result = await put_(url, body, true, sessionId);
+	return result;
 };

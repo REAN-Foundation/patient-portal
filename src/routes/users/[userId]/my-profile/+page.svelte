@@ -10,7 +10,7 @@
 	import Icon from '@iconify/svelte';
 	import { browser } from '$app/environment';
 	import { db } from '$lib/utils.ts/local.db';
-	import { afterNavigate, invalidate } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import ConfirmModal from '$lib/components/modal/confirm.modal.svelte';
 
@@ -18,14 +18,12 @@
 
 	export let form;
 	export let data: PageServerData;
-	console.log('form------',form)
-
-	$: data;
-	$:console.log('data----',data);
+	let imageUrl: string | undefined = undefined;
+	let imageResourceId: string | undefined = undefined;
 	const userId = $page.params.userId;
 	const addressObject = data.healthProfile.Patient.User.Person.Addresses;
 
-	const personObject = data.healthProfile.Patient.User.Person;
+	let personObject = data.healthProfile.Patient.User.Person;
 	const healthObject = data.healthProfile.Patient.HealthProfile;
 
 	const displayName = personObject.DisplayName;
@@ -38,8 +36,8 @@
 	let phone = personObject.Phone || '';
 	let gender = personObject.Gender || '';
 	let maritalStatus = healthObject.MaritalStatus || '';
-	let imageUrl = personObject.ProfileImageURL ?? undefined;
-	let imageResourceId = personObject.ImageResourceId ?? undefined;
+	// let imageUrl = personObject.ProfileImageURL ?? undefined;
+	// let imageResourceId = personObject.ImageResourceId ?? undefined;
 	let dateOfBirth = formatBirthdate(personObject.BirthDate) || '';
 	let formattedDateOfBirth = dateOfBirth.split('-').reverse().join('-');
 	let race = healthObject.Race || '';
@@ -71,6 +69,12 @@
 		state = firstAddress.State || '';
 		country = firstAddress.Country || '';
 		postalCode = firstAddress.PostalCode || '';
+	}
+
+	$: if (data) {
+    personObject = data.healthProfile.Patient.User.Person;
+    imageUrl = personObject.ProfileImageURL ?? undefined;
+    imageResourceId = personObject.ImageResourceId ?? undefined;
 	}
 
 	let previewImage = null;
@@ -122,7 +126,12 @@
 		}
 	};
 
-	const deleteProfileImage = async (model: { ImageResourceId: string; sessionId: string; userId: string }) => {
+	const deleteProfileImage = async () => {
+		const model = {
+				ImageResourceId: imageResourceId,
+				sessionId: data.sessionId,
+				userId: userId,
+			};
 		await fetch(`/api/server/user/delete-profile-image`, {
 			method: 'POST',
 			body: JSON.stringify(model),
@@ -136,14 +145,8 @@
 			showModal = false;
 			await deleteFileResource();
 			await deleteImageFromCache();
-			const model = {
-				ImageResourceId: imageResourceId,
-				sessionId: data.sessionId,
-				userId: userId,
-			};
-			await deleteProfileImage(model);
-			// invalidate('app:my-profile');
-			window.location.href = `/users/${userId}/my-profile`;
+			await deleteProfileImage();
+			invalidateAll();
 		} catch (error) {
 			console.error('Error occurred while deleting image:', error);
 		}
