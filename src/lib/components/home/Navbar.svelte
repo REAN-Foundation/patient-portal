@@ -102,7 +102,7 @@
 	}
 
 	function handleLogoutConfirm() {
-		selectedMode = 'Light';
+		// selectedMode = 'Light';
 		selectedOption = '';
 		localStorage.setItem('themeMode', 'Light');
 		localStorage.removeItem('themeOption');
