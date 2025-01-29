@@ -30,7 +30,7 @@
                 window.onpopstate = () => {
                     history.pushState(null, '', window.location.href);
                 };
-		window.location.href = '/';
+		window.location.replace('/');
 	};
 
 	const onDelete = async () => {
@@ -45,7 +45,7 @@
                 window.onpopstate = () => {
                     history.pushState(null, '', window.location.href);
                 };
-		window.location.href = '/';
+		window.location.replace('/');
 	};
 	
 </script>
