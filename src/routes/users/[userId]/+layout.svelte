@@ -26,6 +26,10 @@
 		});
 		const resp = await response.text();
 		console.log(`resp: ${JSON.stringify(resp, null, 2)}`);
+		history.pushState(null, '', window.location.href);
+                window.onpopstate = () => {
+                    history.pushState(null, '', window.location.href);
+                };
 		window.location.href = '/';
 	};
 
@@ -37,6 +41,10 @@
 		});
 		const resp = await response.text();
 		console.log(`resp: ${JSON.stringify(resp, null, 2)}`);
+		history.pushState(null, '', window.location.href);
+                window.onpopstate = () => {
+                    history.pushState(null, '', window.location.href);
+                };
 		window.location.href = '/';
 	};
 	
