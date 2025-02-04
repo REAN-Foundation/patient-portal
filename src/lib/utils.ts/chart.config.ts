@@ -125,14 +125,7 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                     }
                 }
             },
-            interaction: {
-                mode: 'index',
-                intersect: false
-            },
-            hover: {
-                mode: 'index',
-                intersect: false
-            }
+
         }
     };
 }

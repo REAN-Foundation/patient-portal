@@ -26,7 +26,11 @@
 		});
 		const resp = await response.text();
 		console.log(`resp: ${JSON.stringify(resp, null, 2)}`);
-		window.location.href = '/';
+		history.pushState(null, '', window.location.href);
+                window.onpopstate = () => {
+                    history.pushState(null, '', window.location.href);
+                };
+		window.location.replace('/');
 	};
 
 	const onDelete = async () => {
@@ -37,7 +41,11 @@
 		});
 		const resp = await response.text();
 		console.log(`resp: ${JSON.stringify(resp, null, 2)}`);
-		window.location.href = '/';
+		history.pushState(null, '', window.location.href);
+                window.onpopstate = () => {
+                    history.pushState(null, '', window.location.href);
+                };
+		window.location.replace('/');
 	};
 	
 </script>
