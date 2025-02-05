@@ -43,7 +43,8 @@ export function userTasksFilterData(items) {
     const datasets = categories.map(category => {
         const data = sortedDates
             .map(date => ({
-                x: date,
+                x: format(new Date(date), 'dd MMM yyyy'),
+                // x: date,
                 y: categoryCountsByDate[date][category] || 0
             }))
             .filter(point => point.y > 0);

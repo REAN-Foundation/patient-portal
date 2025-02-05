@@ -37,23 +37,24 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
     return {
         type: 'line',
         data: {
-            datasets: enhancedDatasets
+            datasets: enhancedDatasets,
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    type: 'time',
-                    time: {
-                        unit: 'day',
-                        displayFormats: {
-                            day: 'MMM d'
-                        }
-                    },
+                    type: 'category',
                     title: {
                         display: true,
-                        text: 'Date'
+                        text: 'Date',
+                        // color: textColor
+                    },
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 0,
+                        autoSkipPadding: 10,
                     },
                     grid: {
                         // color: '#E5E5E5'
@@ -105,7 +106,7 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         title: (tooltipItems: any[]) => {
                             if (tooltipItems.length > 0) {
                                 const date = tooltipItems[0].raw.x;
-                                return format(parseISO(date), 'MMMM d, yyyy');
+                                return date;
                             }
                             return '';
                         },
