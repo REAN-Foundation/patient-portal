@@ -19,6 +19,10 @@
 		}
 	});
 
+	$: if (title) {
+		currentPage = 1;
+	}
+
 	$: paginatedData = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
 	function prevPage() {
