@@ -555,7 +555,7 @@ tbody tr {
 }
 
 .save-changes {
-	@apply bg-active border my-4 border-outline text-xs px-4 py-2 md:px-1 md:py-1 lg:px-4 lg:py-2 lg:text-sm  text-info rounded-md shadow hover:bg-active;
+	@apply border my-4 border-outline text-xs px-4 py-2 md:px-1 md:py-1 lg:px-4 lg:py-2 lg:text-sm  text-info rounded-md shadow hover:bg-active;
 }
 .hr-line {
 	@apply border-t border-secondary my-4;
