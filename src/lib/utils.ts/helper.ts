@@ -1,4 +1,6 @@
+import { formatDate } from "./functions";
 import { DateStringFormat } from "./time.types";
+import { format } from 'date-fns';
 
 export class Helper {
 
@@ -216,4 +218,26 @@ export class Helper {
         today.setDate(today.getDate() - 1);
         return Helper.getDateString(today, DateStringFormat.YYYY_MM_DD);
     };
+
+    static getStartAndEndDates(tasks) {
+        if (!tasks || tasks.length === 0) {
+            return { startDate: null, endDate: null };
+        }
+        
+        const validTasks = tasks.filter(task => 
+            task?.Action?.ScheduledAt || task.ScheduledStartTime
+        );
+        
+        if (validTasks.length === 0) {
+            return { startDate: null, endDate: null };
+        }
+    
+        const startTask = validTasks[0];
+        const endTask = validTasks[validTasks.length - 1];
+        
+        const startDate = format(startTask.Action?.ScheduledAt || startTask.ScheduledStartTime, 'dd MMM yyyy');
+        const endDate = format(endTask.Action?.ScheduledAt || endTask.ScheduledStartTime, 'dd MMM yyyy');
+        
+        return { startDate, endDate };
+    }
 }

@@ -11,72 +11,86 @@ export const load: PageServerLoad = async (event: ServerLoadEvent) => {
     const sessionId = event.cookies.get('sessionId') as string;
     const userId = event.params.userId as string;
     let itemsPerPage = 500;
-    let response;
+    
     const searchParams = {
         userId: userId,
         ActionType: 'CarePlan',
         itemsPerPage: itemsPerPage 
-    }
+    };
     
-    response = await getUserTasks(sessionId, searchParams);
+    let response = await getUserTasks(sessionId, searchParams);
 
     if (response.Status === 'failure' || response.HttpCode !== 200) {
         throw error(response.HttpCode, response.Message || 'An error occurred');
     }
+    console.log('response-----', response.Data.UserTasks);
 
-    let  userTasks = response.Data.UserTasks.Items;
+    let userTasks = response.Data.UserTasks.Items;
 
+    // Ensure we have all items
     if (userTasks.TotalCount > itemsPerPage) {
         itemsPerPage = userTasks.TotalCount;
         response = await getUserTasks(sessionId, searchParams);
-        userTasks = response.Data.UserTasks;
+        userTasks = response.Data.UserTasks.Items;
     }  
 
-    const careplanTasks_ = userTasks.reduce((groupedTasks, task) => {
+    const careplanTasks = userTasks.reduce((groupedTasks, task) => {
+        const enrollmentId = task?.Action?.EnrollmentId;
         const planCode = task?.Action?.PlanCode;
-        if (planCode) {
-            if (!groupedTasks[planCode]) {
-                groupedTasks[planCode] = [];
+    
+        if (enrollmentId && planCode) {
+            if (!groupedTasks[enrollmentId]) {
+                groupedTasks[enrollmentId] = {};
             }
-            groupedTasks[planCode].push(task);
+            if (!groupedTasks[enrollmentId][planCode]) {
+                groupedTasks[enrollmentId][planCode] = [];
+            }
+    
+            groupedTasks[enrollmentId][planCode].push({
+                ...task,
+                ScheduledStartTime: task.ScheduledStartTime || task.Action?.ScheduledAt,
+                Status: task.Status === "Completed" ? "Completed" : "Pending"
+            });
         }
+    
         return groupedTasks;
     }, {});
 
-	const firstPlanCode = Object.keys(careplanTasks_)[0];
-   	const firstPlanCodeTasks = firstPlanCode ? careplanTasks_[firstPlanCode] : [];
-	const careplanTasks = firstPlanCodeTasks.sort((a, b) => {
-        const freqA = a?.Action?.Frequency || 0;
-        const freqB = b?.Action?.Frequency || 0;
-        return freqA - freqB;
-    });
-
-	const dayWiseData = getDayWiseData(careplanTasks);
-	const weekWiseData = getWeekWiseData(careplanTasks);
-
-    const dayWiseSeparatedData = separateData(dayWiseData);
-	const weekWiseSeparatedData = separateData(weekWiseData);
-
-    const { startDate, endDate } = getStartAndEndDates(careplanTasks);
-
-    // const response = await getPatientStatistics(sessionId, userId);
-
-    // const careplanTasks = response.careplanData.careplanTasks;
-    // const dayWiseSeparatedData = response.careplanData.dayWiseSeparatedData;
-    // const weekWiseSeparatedData = response.careplanData.weekWiseSeparatedData;
-    // const startDate = response.careplanData.startDate;
-    // const endDate = response.careplanData.endDate;
+    const enrolledCareplanData = [];
+    for (const [enrollmentId, plans] of Object.entries(careplanTasks)) {
+        for (const [planCode, tasks] of Object.entries(plans)) {
+            enrolledCareplanData.push({ enrollmentId, planCode, tasks });
+        }
+    }
 
     return {
-        // userTasks,
         sessionId,
+        enrolledCareplanData,
         careplanTasks,
-        dayWiseSeparatedData,
-        weekWiseSeparatedData, 
-        startDate,
-        endDate,
     };
 };
+
+function getStartAndEndDates(tasks) {
+    if (!tasks || tasks.length === 0) {
+        return { startDate: null, endDate: null };
+    }
+    
+    const validTasks = tasks.filter(task => 
+        task?.Action?.ScheduledAt || task.ScheduledStartTime
+    );
+    
+    if (validTasks.length === 0) {
+        return { startDate: null, endDate: null };
+    }
+
+    const startTask = validTasks[0];
+    const endTask = validTasks[validTasks.length - 1];
+    
+    const startDate = formatDate(startTask.Action?.ScheduledAt || startTask.ScheduledStartTime);
+    const endDate = formatDate(endTask.Action?.ScheduledAt || endTask.ScheduledStartTime);
+    
+    return { startDate, endDate };
+}
 
 function separateData(data) {
     const labels = Object.keys(data);
@@ -85,11 +99,4 @@ function separateData(data) {
     return { labels, scheduled, completed };
 }
 
-function getStartAndEndDates(tasks) {
-    if (tasks.length === 0) {
-        return { startDate: null, endDate: null };
-    }
-    const startDate = formatDate(tasks[0].Action.ScheduledAt);
-    const endDate = formatDate(tasks[tasks.length - 1].Action.ScheduledAt);
-    return { startDate, endDate };
-}
+
