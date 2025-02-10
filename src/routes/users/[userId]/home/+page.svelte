@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatBirthdate } from '$lib/utils.ts/functions';
+	import { formatBirthdate, formatDateMonth } from '$lib/utils.ts/functions';
     import type { PageServerData } from './$types';
     export let data: PageServerData;
 
@@ -24,7 +24,7 @@
 
     const basicInfo = [
         { label: "Name", value: getValue(userProfileData?.DisplayName) },
-        { label: "Date of Birth", value: formatBirthdate(getValue(userProfileData?.BirthDate)) },
+        { label: "Date of Birth", value: formatDateMonth(getValue(userProfileData?.BirthDate)) },
         { label: "Email", value: getValue(userProfileData?.Email) },
         { label: "Phone", value: getValue(userProfileData?.Phone) },
         { label: "Blood Group", value: getValue(healthProfile?.BloodGroup) },
