@@ -1,8 +1,8 @@
 export function formatDateMonth(utcDate: string): string {
         const date = new Date(utcDate);
-        return new Intl.DateTimeFormat('en-GB', {
-          day: 'numeric',
+        return new Intl.DateTimeFormat('en-US', {
           month: 'short',
+          day: 'numeric',
           year: 'numeric'
         }).format(date);
       }

@@ -1,4 +1,4 @@
-import { formatDate } from "./functions";
+import { formatDate, formatDateMonth } from "./functions";
 import { DateStringFormat } from "./time.types";
 import { format } from 'date-fns';
 
@@ -235,8 +235,8 @@ export class Helper {
         const startTask = validTasks[0];
         const endTask = validTasks[validTasks.length - 1];
         
-        const startDate = format(startTask.Action?.ScheduledAt || startTask.ScheduledStartTime, 'dd MMM yyyy');
-        const endDate = format(endTask.Action?.ScheduledAt || endTask.ScheduledStartTime, 'dd MMM yyyy');
+        const startDate = formatDateMonth(startTask.Action?.ScheduledAt || startTask.ScheduledStartTime);
+        const endDate = formatDateMonth(endTask.Action?.ScheduledAt || endTask.ScheduledStartTime);
         
         return { startDate, endDate };
     }
