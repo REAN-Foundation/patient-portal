@@ -10,7 +10,14 @@
 
     let careplanTasksData = data.enrolledCareplanData;
 
-    $: selectedEnrollmentId = careplanTasksData.length > 0 ? careplanTasksData[0].enrollmentId : null;
+    $: sortedCareplans = careplanTasksData.sort((a, b) => {
+        const aMaxDate = Math.max(...a.tasks.map(task => new Date(task.EndDate || task.ScheduledStartTime).getTime()));
+        const bMaxDate = Math.max(...b.tasks.map(task => new Date(task.EndDate || task.ScheduledStartTime).getTime()));
+
+        return bMaxDate - aMaxDate;
+    });
+
+    $: selectedEnrollmentId = sortedCareplans.length > 0 ? sortedCareplans[0].enrollmentId : null;
     $: selectedPlancode = careplanTasksData.find(
         (plan) => plan.enrollmentId === selectedEnrollmentId
         );
