@@ -22,9 +22,12 @@ function getRandomColor(): string {
     return color;
 }
 export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConfiguration {
-    // Generate a new random color for each dataset
+
+    const allDates = Array.from(new Set(chartData.datasets.flatMap(dataset => dataset.data.map(point => point.x))))
+        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     const enhancedDatasets = chartData.datasets.map(dataset => ({
         ...dataset,
+        data: allDates.map(date => dataset.data.find(point => point.x === date)?.y || 0),
         backgroundColor: getRandomColor(),
         borderColor: getRandomColor(),
         borderWidth: 2,
@@ -36,6 +39,7 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
     }));
     return {
         type: 'line',
+        labels: allDates,
         data: {
             datasets: enhancedDatasets,
         },
@@ -45,6 +49,7 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
             scales: {
                 x: {
                     type: 'category',
+                    labels: allDates,
                     title: {
                         display: true,
                         text: 'Date',
@@ -71,7 +76,7 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         precision: 0
                     },
                     min: 0,
-                    max: Math.ceil(Math.max(...enhancedDatasets.flatMap(d => d.data.map(point => point.y)))),
+                    max: Math.ceil(Math.max(...chartData.datasets.flatMap(d => d.data.map(point => point.y)))),
                     grid: {
                         // color: '#E5E5E5'
                     }
@@ -102,18 +107,6 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         size: 13
                     },
                     displayColors: true,
-                    callbacks: {
-                        title: (tooltipItems: any[]) => {
-                            if (tooltipItems.length > 0) {
-                                const date = tooltipItems[0].raw.x;
-                                return date;
-                            }
-                            return '';
-                        },
-                        label: (context: { dataset: { label: string }; raw: { y: number } }) => {
-                            return `${context.dataset.label}: ${context.raw.y} tasks`;
-                        }
-                    }
                 },
                 legend: {
                     position: 'bottom',
