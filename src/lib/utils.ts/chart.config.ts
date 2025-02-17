@@ -21,8 +21,11 @@ function getRandomColor(): string {
     }
     return color;
 }
-export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConfiguration {
 
+export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConfiguration { 
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    let textColor = isDarkMode ? '#d9dee9' : '#1c252a';
+    let gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
     const allDates = Array.from(new Set(chartData.datasets.flatMap(dataset => dataset.data.map(point => point.x))))
         .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     const enhancedDatasets = chartData.datasets.map(dataset => ({
@@ -53,33 +56,43 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                     title: {
                         display: true,
                         text: 'Date',
-                        // color: textColor
+                        color: textColor
+                    },
+                    border: {
+                        color: gridColor
                     },
                     ticks: {
                         autoSkip: false,
                         maxRotation: 45,
                         minRotation: 0,
                         autoSkipPadding: 10,
+                        color: textColor
                     },
                     grid: {
-                        // color: '#E5E5E5'
+                        display: false
                     }
                 },
                 y: {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Count'
+                        text: 'Count',
+                        color: textColor
                     },
                     ticks: {
                         stepSize: 1,
-                        precision: 0
+                        precision: 0,
+                        color: textColor
                     },
                     min: 0,
                     max: Math.ceil(Math.max(...chartData.datasets.flatMap(d => d.data.map(point => point.y)))),
                     grid: {
-                        // color: '#E5E5E5'
-                    }
+                        color: gridColor,
+						lineWidth: 0.3,
+                    },
+                    border: {
+                        color: gridColor
+                    },
                 }
             },
             plugins: {
@@ -90,7 +103,8 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         size: 16,
                         weight: 'bold'
                     },
-                    padding: 20
+                    padding: 20,
+                    color: textColor
                 },
                 tooltip: {
                     enabled: true,
@@ -115,7 +129,8 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         padding: 20,
                         font: {
                             size: 12
-                        }
+                        },
+                        color: textColor,
                     }
                 }
             },

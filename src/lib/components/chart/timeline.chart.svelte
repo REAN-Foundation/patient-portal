@@ -18,14 +18,23 @@
 				if (timeSeriesChart) {
 					timeSeriesChart.destroy();
 				}
-				const config = createTimeSeriesConfig(chartData);
+				let config = createTimeSeriesConfig(chartData);
 				timeSeriesChart = new Chart(tsCtx, config);
 			}
 		}
 	};
 
+	function updateChartOnThemeChange() {
+		initChart();
+	}
+
 	onMount(() => {
 		initChart();
+		const observer = new MutationObserver(updateChartOnThemeChange);
+		observer.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['data-theme']
+		});
 		return () => {
 			if (timeSeriesChart) timeSeriesChart.destroy();
 		};
