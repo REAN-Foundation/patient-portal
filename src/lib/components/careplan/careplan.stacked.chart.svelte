@@ -62,10 +62,17 @@
         };
     }
 
-	function getThemeColor() {
-        const theme = document.documentElement.getAttribute('data-theme');
-        return theme === 'dark' ? '#D9DEE9' : '#1C252A';
-    }
+	// function getThemeColor() {
+    //     const theme = document.documentElement.getAttribute('data-theme');
+    //     return theme === 'dark' ? '#D9DEE9' : '#1C252A';
+    // }
+    function getThemeColor(): { textColor: string; gridColor: string } {
+		const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+		return {
+			textColor: isDarkMode ? '#d9dee9' : '#1c252a',
+			gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+		};
+	}
 
     function createChart() {
         if (!canvas) {
@@ -90,7 +97,8 @@
         const tasks = selectedPlancode ? selectedPlancode.tasks : [];
 
         const chartData = processTasksData(tasks, view);
-		const themeColor = getThemeColor();
+		// const themeColor = getThemeColor();
+        const { textColor, gridColor } = getThemeColor();
 		chart = new Chart(ctx, {
             type: 'bar',
             data: chartData,
@@ -106,14 +114,17 @@
                             // font: {
                             //     size: 16
                             // },
-                            color: themeColor // Set text color dynamically
+                            color: textColor // Set text color dynamically
                         },
                         ticks: {
-                            color: themeColor
+                            color: textColor
                         },
                         grid: {
                             display: false
-                        }
+                        },
+                        border: {
+							color: gridColor
+						}
                     },
                     y: {
                         stacked: true,
@@ -124,14 +135,19 @@
                             // font: {
                             //     size: 16
                             // },
-                            color: themeColor // Set text color dynamically
+                            color: textColor
                         },
                         ticks: {
-                            color: themeColor
+                            color: textColor
                         },
                         grid: {
-                            display: true
-                        }
+                            display: true,
+                            color: gridColor,
+							lineWidth: 0.3,
+                        },
+                        border: {
+							color: gridColor
+						}
                     }
                 },
                 plugins: {
@@ -142,7 +158,7 @@
                             size: 16,
                             weight: 'bold'
                         },
-                        color: themeColor, // Set text color dynamically
+                        color: textColor, // Set text color dynamically
                         padding: 8
                     },
                     legend: {
@@ -152,7 +168,7 @@
                             padding: 20,
                             usePointStyle: true,
                             pointStyle: 'circle',
-                            color: themeColor // Set legend text color dynamically
+                            color: textColor // Set legend text color dynamically
                         }
                     },
                     tooltip: {
