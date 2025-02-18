@@ -30,7 +30,7 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
         .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     const enhancedDatasets = chartData.datasets.map(dataset => ({
         ...dataset,
-        data: allDates.map(date => dataset.data.find(point => point.x === date)?.y || 0),
+        data: allDates.map(date => dataset.data.find(point => point.x === date)?.y),
         backgroundColor: getRandomColor(),
         borderColor: getRandomColor(),
         borderWidth: 2,
