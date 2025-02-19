@@ -1,38 +1,15 @@
 import { error, type ServerLoadEvent } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import {getUserTasks } from "$routes/api/services/user.task";
-import { formatDate, getDayWiseData, getWeekWiseData } from "$lib/utils.ts/functions";
-// import { formatDate} from "$lib/utils.ts/functions";
-// import { getPatientStatistics } from "$routes/api/services/statistics";
+import {getCarePlanTasks } from "$routes/api/services/user.task";
+import { formatDate } from "$lib/utils.ts/functions";
 
 ///////////////////////////////////////////////////////////////////////////////
 
 export const load: PageServerLoad = async (event: ServerLoadEvent) => {
     const sessionId = event.cookies.get('sessionId') as string;
     const userId = event.params.userId as string;
-    let itemsPerPage = 500;
     
-    const searchParams = {
-        userId: userId,
-        ActionType: 'CarePlan',
-        itemsPerPage: itemsPerPage 
-    };
-    
-    let response = await getUserTasks(sessionId, searchParams);
-
-    if (response.Status === 'failure' || response.HttpCode !== 200) {
-        throw error(response.HttpCode, response.Message || 'An error occurred');
-    }
-    console.log('response-----', response.Data.UserTasks);
-
-    let userTasks = response.Data.UserTasks.Items;
-
-    // Ensure we have all items
-    if (userTasks.TotalCount > itemsPerPage) {
-        itemsPerPage = userTasks.TotalCount;
-        response = await getUserTasks(sessionId, searchParams);
-        userTasks = response.Data.UserTasks.Items;
-    }  
+    let userTasks = await getCarePlanTasks(sessionId, userId);
 
     const careplanTasks = userTasks.reduce((groupedTasks, task) => {
         const enrollmentId = task?.Action?.EnrollmentId;
