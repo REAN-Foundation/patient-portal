@@ -21,10 +21,16 @@ function getRandomColor(): string {
     }
     return color;
 }
-export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConfiguration {
-    // Generate a new random color for each dataset
+
+export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConfiguration { 
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    let textColor = isDarkMode ? '#d9dee9' : '#1c252a';
+    let gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+    const allDates = Array.from(new Set(chartData.datasets.flatMap(dataset => dataset.data.map(point => point.x))))
+        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     const enhancedDatasets = chartData.datasets.map(dataset => ({
         ...dataset,
+        data: allDates.map(date => dataset.data.find(point => point.x === date)?.y),
         backgroundColor: getRandomColor(),
         borderColor: getRandomColor(),
         borderWidth: 2,
@@ -36,44 +42,57 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
     }));
     return {
         type: 'line',
+        labels: allDates,
         data: {
-            datasets: enhancedDatasets
+            datasets: enhancedDatasets,
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    type: 'time',
-                    time: {
-                        unit: 'day',
-                        displayFormats: {
-                            day: 'MMM d'
-                        }
-                    },
+                    type: 'category',
+                    labels: allDates,
                     title: {
                         display: true,
-                        text: 'Date'
+                        text: 'Date',
+                        color: textColor
+                    },
+                    border: {
+                        color: gridColor
+                    },
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 45,
+                        minRotation: 0,
+                        autoSkipPadding: 10,
+                        color: textColor
                     },
                     grid: {
-                        // color: '#E5E5E5'
+                        display: false
                     }
                 },
                 y: {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Count'
+                        text: 'Count',
+                        color: textColor
                     },
                     ticks: {
                         stepSize: 1,
-                        precision: 0
+                        precision: 0,
+                        color: textColor
                     },
                     min: 0,
-                    max: Math.ceil(Math.max(...enhancedDatasets.flatMap(d => d.data.map(point => point.y)))),
+                    max: Math.ceil(Math.max(...chartData.datasets.flatMap(d => d.data.map(point => point.y)))),
                     grid: {
-                        // color: '#E5E5E5'
-                    }
+                        color: gridColor,
+						lineWidth: 0.3,
+                    },
+                    border: {
+                        color: gridColor
+                    },
                 }
             },
             plugins: {
@@ -84,7 +103,8 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         size: 16,
                         weight: 'bold'
                     },
-                    padding: 20
+                    padding: 20,
+                    color: textColor
                 },
                 tooltip: {
                     enabled: true,
@@ -101,18 +121,6 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         size: 13
                     },
                     displayColors: true,
-                    callbacks: {
-                        title: (tooltipItems: any[]) => {
-                            if (tooltipItems.length > 0) {
-                                const date = tooltipItems[0].raw.x;
-                                return format(parseISO(date), 'MMMM d, yyyy');
-                            }
-                            return '';
-                        },
-                        label: (context: { dataset: { label: string }; raw: { y: number } }) => {
-                            return `${context.dataset.label}: ${context.raw.y} tasks`;
-                        }
-                    }
                 },
                 legend: {
                     position: 'bottom',
@@ -121,7 +129,8 @@ export function createTimeSeriesConfig(chartData: ProcessedChartData): ChartConf
                         padding: 20,
                         font: {
                             size: 12
-                        }
+                        },
+                        color: textColor,
                     }
                 }
             },

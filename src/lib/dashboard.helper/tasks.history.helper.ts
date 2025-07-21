@@ -1,3 +1,4 @@
+import { formatDateMonth } from '$lib/utils.ts/functions';
 import { format } from 'date-fns';
 // import type { ProcessedChartData } from '$lib/utils.ts/chart.config';
 
@@ -20,8 +21,8 @@ export function userTasksFilterData(items) {
     // const completedItems = items.filter(item => item.Status === 'Completed');
     console.log('items',items);
     const categoryCountsByDate = items.reduce((acc, item) => {
-        const date = new Date(item.FinishedAt);
-        const dateStr = format(date, 'yyyy-MM-dd');
+        // const date  = new Date(item.FinishedAt);
+        const dateStr = formatDateMonth(item.FinishedAt);
         
         if (!acc[dateStr]) {
             acc[dateStr] = {};
@@ -43,7 +44,8 @@ export function userTasksFilterData(items) {
     const datasets = categories.map(category => {
         const data = sortedDates
             .map(date => ({
-                x: date,
+                x: formatDateMonth(date),
+                // x: date,
                 y: categoryCountsByDate[date][category] || 0
             }))
             .filter(point => point.y > 0);

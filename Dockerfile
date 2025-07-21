@@ -1,4 +1,4 @@
-FROM node:20.11-alpine3.18 AS builder
+FROM node:20.19-alpine3.21 AS builder
 
 WORKDIR /app
 COPY . .
@@ -9,7 +9,7 @@ RUN npm run build
 
 #######################################
 
-FROM node:20.11-alpine3.18
+FROM node:20.19-alpine3.21
 
 RUN apk add bash
 RUN apk add --no-cache \
@@ -29,7 +29,7 @@ COPY --from=builder ./app/ ./
 RUN npm install
 
 ARG ORIGIN
-ENV ORIGIN=${ORIGIN} 
+ENV ORIGIN=${ORIGIN}
 
 ARG ENVIRONMENT
 ENV ENVIRONMENT=${ENVIRONMENT}

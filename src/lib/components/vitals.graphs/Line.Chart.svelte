@@ -61,6 +61,9 @@
 							display: true,
 							text: 'Date',
 							color: textColor
+						},
+						border: {
+							color: gridColor
 						}
 					},
 					y: {
@@ -79,6 +82,9 @@
 							display: true,
 							text: title,
 							color: textColor
+						},
+						border: {
+							color: gridColor
 						}
 					}
 				},
