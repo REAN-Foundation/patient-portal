@@ -11,7 +11,7 @@ on:
       deploy_to_ecs:
         description: 'Deploy to ECS after building'
         required: false
-        default: 'false'
+        default: false
         type: boolean
 
 env:
@@ -58,16 +58,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      # Download configuration files from S3 before build
-      # These files contain real values that will be embedded during npm run build
+      # Download .env from S3 before build
+      # Contains real values that will be embedded during npm run build via $env/static/private
+      # Note: constants.ts and favicon.png are downloaded at RUNTIME by entrypoint.sh
       - name: Copy env file from S3
         run: aws s3 cp s3://${{ secrets.LVPEI_CONFIG_BUCKET }}/patient-portal/.env ./.env
-
-      - name: Copy constants file from S3
-        run: aws s3 cp s3://${{ secrets.LVPEI_CONFIG_BUCKET }}/patient-portal/constants.ts ./src/lib/constants.ts
-
-      - name: Copy favicon file from S3
-        run: aws s3 cp s3://${{ secrets.LVPEI_CONFIG_BUCKET }}/patient-portal/favicon.png ./static/favicon.png
 
       - name: Build and push Docker image
         id: build-image
