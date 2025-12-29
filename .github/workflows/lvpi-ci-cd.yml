@@ -58,6 +58,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      # Download configuration files from S3 before build
+      # These files contain real values that will be embedded during npm run build
+      - name: Copy env file from S3
+        run: aws s3 cp s3://${{ secrets.LVPEI_CONFIG_BUCKET }}/patient-portal/.env ./.env
+
+      - name: Copy constants file from S3
+        run: aws s3 cp s3://${{ secrets.LVPEI_CONFIG_BUCKET }}/patient-portal/constants.ts ./src/lib/constants.ts
+
+      - name: Copy favicon file from S3
+        run: aws s3 cp s3://${{ secrets.LVPEI_CONFIG_BUCKET }}/patient-portal/favicon.png ./static/favicon.png
+
       - name: Build and push Docker image
         id: build-image
         env:
