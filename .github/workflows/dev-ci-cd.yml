@@ -84,19 +84,16 @@ jobs:
           set -euo pipefail
           aws s3 cp s3://${{ secrets.ENV_FILE_BUCKET_PATH }}/.env ./.env
 
-      - name: Log in to Harbor
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ steps.vars.outputs.harbor_registry }}
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
-
       - name: Harbor auth preflight
         shell: bash
         env:
           HARBOR_REGISTRY: ${{ steps.vars.outputs.harbor_registry }}
         run: |
           set -euo pipefail
+
+          echo "Checking Harbor /v2/ endpoint and redirects"
+          curl -sSIL "https://${HARBOR_REGISTRY}/v2/" | tr -d '\r'
+
           challenge=$(curl -sSI "https://${HARBOR_REGISTRY}/v2/" | tr -d '\r')
           echo "$challenge"
 
@@ -116,6 +113,13 @@ jobs:
             echo "Harbor auth challenge returned empty service. Check Harbor externalURL/ingress and core/registry config." >&2
             exit 1
           fi
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ steps.vars.outputs.harbor_registry }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
 
       - name: Cache Docker layers
         uses: actions/cache@v3
