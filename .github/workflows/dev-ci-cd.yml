@@ -25,8 +25,8 @@ jobs:
         id: vars
         shell: bash
         run: |
-          harbor_registry_raw=$(printf '%s' '${{ secrets.HARBOR_REGISTRY }}' | sed 's/^"//;s/"$//')
-          harbor_registry=$(printf '%s' "$harbor_registry_raw" | sed -E 's#^https?://##; s#/.*$##; s#/$##')
+          harbor_registry_raw=$(printf '%s' '${{ secrets.HARBOR_REGISTRY }}' | tr -d '\r' | sed 's/^"//;s/"$//')
+          harbor_registry=$(printf '%s' "$harbor_registry_raw" | sed -E 's#^[[:space:]]+##; s#[[:space:]]+$##; s#^https?://##; s#/.*$##; s#/$##')
           harbor_project=$(printf '%s' '${{ secrets.HARBOR_PROJECT }}' | sed 's/^"//;s/"$//; s#^/##; s#/$##')
 
           if [ -z "$harbor_registry" ]; then
@@ -90,6 +90,32 @@ jobs:
           registry: ${{ steps.vars.outputs.harbor_registry }}
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
+
+      - name: Harbor auth preflight
+        shell: bash
+        env:
+          HARBOR_REGISTRY: ${{ steps.vars.outputs.harbor_registry }}
+        run: |
+          set -euo pipefail
+          challenge=$(curl -sSI "https://${HARBOR_REGISTRY}/v2/" | tr -d '\r')
+          echo "$challenge"
+
+          www_auth=$(printf '%s\n' "$challenge" | awk 'BEGIN{IGNORECASE=1} /^Www-Authenticate:/{sub(/^Www-Authenticate:[[:space:]]*/,""); print}')
+          if [ -z "$www_auth" ]; then
+            echo "No Www-Authenticate header received from Harbor /v2/ endpoint" >&2
+            exit 1
+          fi
+
+          service=$(printf '%s\n' "$www_auth" | sed -n 's/.*service="\([^"]*\)".*/\1/p')
+          realm=$(printf '%s\n' "$www_auth" | sed -n 's/.*realm="\([^"]*\)".*/\1/p')
+
+          echo "Auth realm: ${realm:-<empty>}"
+          echo "Auth service: ${service:-<empty>}"
+
+          if [ -z "$service" ]; then
+            echo "Harbor auth challenge returned empty service. Check Harbor externalURL/ingress and core/registry config." >&2
+            exit 1
+          fi
 
       - name: Cache Docker layers
         uses: actions/cache@v3
