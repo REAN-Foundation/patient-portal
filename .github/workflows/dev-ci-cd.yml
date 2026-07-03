@@ -25,20 +25,29 @@ jobs:
         id: vars
         shell: bash
         run: |
+          harbor_registry=$(printf '%s' '${{ secrets.HARBOR_REGISTRY }}' | sed 's/^"//;s/"$//')
+          harbor_project=$(printf '%s' '${{ secrets.HARBOR_PROJECT }}' | sed 's/^"//;s/"$//')
           repo_name=$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
           echo "branch=$(echo ${GITHUB_REF#refs/heads/} | sed 's#/#-#g')" >> "$GITHUB_OUTPUT"
           echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "repo_name=$repo_name" >> "$GITHUB_OUTPUT"
-          echo "image_repository=${{ secrets.HARBOR_REGISTRY }}/${{ secrets.HARBOR_PROJECT }}/$repo_name" >> "$GITHUB_OUTPUT"
+          echo "harbor_registry=$harbor_registry" >> "$GITHUB_OUTPUT"
+          echo "image_repository=$harbor_registry/$harbor_project/$repo_name" >> "$GITHUB_OUTPUT"
           echo "develop_tag=develop_$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Print Branch Details
+        env:
+          BRANCH: ${{ steps.vars.outputs.branch }}
+          SHA_SHORT: ${{ steps.vars.outputs.sha_short }}
+          REPO_NAME: ${{ steps.vars.outputs.repo_name }}
+          IMAGE_REPOSITORY: ${{ steps.vars.outputs.image_repository }}
+          DEVELOP_TAG: ${{ steps.vars.outputs.develop_tag }}
         run: |
-          echo "Branch: ${{ steps.vars.outputs.branch }}"
-          echo "Sha: ${{ steps.vars.outputs.sha_short }}"
-          echo "Repo: ${{ steps.vars.outputs.repo_name }}"
-          echo "Image Repository: ${{ steps.vars.outputs.image_repository }}"
-          echo "Develop Tag: ${{ steps.vars.outputs.develop_tag }}"
+          printf 'Branch: %s\n' "$BRANCH"
+          printf 'Sha: %s\n' "$SHA_SHORT"
+          printf 'Repo: %s\n' "$REPO_NAME"
+          printf 'Image Repository: %s\n' "$IMAGE_REPOSITORY"
+          printf 'Develop Tag: %s\n' "$DEVELOP_TAG"
 
 
       - name: Set up Docker Buildx
@@ -48,7 +57,7 @@ jobs:
       - name: Log in to Harbor
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.HARBOR_REGISTRY }}
+          registry: ${{ steps.vars.outputs.harbor_registry }}
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
