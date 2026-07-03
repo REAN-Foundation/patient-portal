@@ -25,13 +25,26 @@ jobs:
         id: vars
         shell: bash
         run: |
-          harbor_registry=$(printf '%s' '${{ secrets.HARBOR_REGISTRY }}' | sed 's/^"//;s/"$//')
-          harbor_project=$(printf '%s' '${{ secrets.HARBOR_PROJECT }}' | sed 's/^"//;s/"$//')
+          harbor_registry_raw=$(printf '%s' '${{ secrets.HARBOR_REGISTRY }}' | sed 's/^"//;s/"$//')
+          harbor_registry=$(printf '%s' "$harbor_registry_raw" | sed -E 's#^https?://##; s#/.*$##; s#/$##')
+          harbor_project=$(printf '%s' '${{ secrets.HARBOR_PROJECT }}' | sed 's/^"//;s/"$//; s#^/##; s#/$##')
+
+          if [ -z "$harbor_registry" ]; then
+            echo "HARBOR_REGISTRY resolved to an empty value after normalization" >&2
+            exit 1
+          fi
+
+          if [ -z "$harbor_project" ]; then
+            echo "HARBOR_PROJECT is empty" >&2
+            exit 1
+          fi
+
           repo_name=$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
           echo "branch=$(echo ${GITHUB_REF#refs/heads/} | sed 's#/#-#g')" >> "$GITHUB_OUTPUT"
           echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "repo_name=$repo_name" >> "$GITHUB_OUTPUT"
           echo "harbor_registry=$harbor_registry" >> "$GITHUB_OUTPUT"
+          echo "harbor_project=$harbor_project" >> "$GITHUB_OUTPUT"
           echo "image_repository=$harbor_registry/$harbor_project/$repo_name" >> "$GITHUB_OUTPUT"
           echo "develop_tag=develop_$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
@@ -40,12 +53,16 @@ jobs:
           BRANCH: ${{ steps.vars.outputs.branch }}
           SHA_SHORT: ${{ steps.vars.outputs.sha_short }}
           REPO_NAME: ${{ steps.vars.outputs.repo_name }}
+          HARBOR_REGISTRY: ${{ steps.vars.outputs.harbor_registry }}
+          HARBOR_PROJECT: ${{ steps.vars.outputs.harbor_project }}
           IMAGE_REPOSITORY: ${{ steps.vars.outputs.image_repository }}
           DEVELOP_TAG: ${{ steps.vars.outputs.develop_tag }}
         run: |
           printf 'Branch: %s\n' "$BRANCH"
           printf 'Sha: %s\n' "$SHA_SHORT"
           printf 'Repo: %s\n' "$REPO_NAME"
+          printf 'Harbor Registry: %s\n' "$HARBOR_REGISTRY"
+          printf 'Harbor Project: %s\n' "$HARBOR_PROJECT"
           printf 'Image Repository: %s\n' "$IMAGE_REPOSITORY"
           printf 'Develop Tag: %s\n' "$DEVELOP_TAG"
 
