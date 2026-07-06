@@ -125,6 +125,47 @@ jobs:
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_PASSWORD }}
 
+      # TEMP DEBUG: pinpoint where the Azure runner -> server network path drops
+      # packets. Runs inside the job right before the failing push. Remove once
+      # the loss point (server ISP vs Azure transit) is identified.
+      - name: Network path diagnostics (debug)
+        continue-on-error: true
+        shell: bash
+        env:
+          HARBOR_REGISTRY: ${{ steps.vars.outputs.harbor_registry }}
+        run: |
+          set +e
+          echo "==== Runner egress IP + region ===="
+          curl -sS --max-time 10 https://ipinfo.io 2>/dev/null || true
+          echo ""
+
+          echo "==== Resolve target ===="
+          getent hosts "$HARBOR_REGISTRY" || nslookup "$HARBOR_REGISTRY" || true
+          TARGET_IP=$(getent hosts "$HARBOR_REGISTRY" | awk '{print $1}' | head -1)
+          echo "Target: $HARBOR_REGISTRY -> ${TARGET_IP:-unknown}"
+
+          echo "==== Installing mtr + traceroute ===="
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y -qq mtr-tiny traceroute >/dev/null 2>&1
+
+          echo "==== ping (30 packets) ===="
+          ping -c 30 "$HARBOR_REGISTRY" || true
+
+          echo "==== mtr report: per-hop loss %, TCP/443, 50 cycles ===="
+          sudo mtr -rwz -c 50 -T -P 443 "$HARBOR_REGISTRY" || sudo mtr -rwz -c 50 "$HARBOR_REGISTRY" || true
+
+          echo "==== traceroute TCP/443 ===="
+          sudo traceroute -T -p 443 -n "$HARBOR_REGISTRY" || traceroute -n "$HARBOR_REGISTRY" || true
+
+          echo "==== PMTU probe (DF-bit ping sweep) ===="
+          for sz in 1400 1440 1460 1472; do
+            printf "payload %s bytes: " "$sz"
+            ping -c 2 -M do -s "$sz" -W 2 "$HARBOR_REGISTRY" >/dev/null 2>&1 && echo OK || echo "DROP (too big for path)"
+          done
+
+          echo "==== TLS handshake timing to :443 ===="
+          curl -sS -o /dev/null -w 'dns=%{time_namelookup}s connect=%{time_connect}s tls=%{time_appconnect}s http=%{http_code}\n' "https://$HARBOR_REGISTRY/v2/" || true
+
       - name: Build and push image to Harbor
         id: docker_build
         continue-on-error: true
