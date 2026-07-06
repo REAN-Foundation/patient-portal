@@ -168,48 +168,21 @@ jobs:
 
       - name: Build and push image to Harbor
         id: docker_build
-        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
+          network: host # Forces buildx to use the runner's direct public network card
           tags: ${{ steps.vars.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false
           sbom: false
-          outputs: type=image,name=${{ steps.vars.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }},push=true,compression=gzip,compression-level=9,force-compression=true
-
-      - name: Retry build and push image to Harbor
-        id: docker_build_retry
-        if: steps.docker_build.outcome == 'failure'
-        uses: docker/build-push-action@v7
-        with:
-          context: ./
-          file: ./Dockerfile
-          builder: ${{ steps.buildx.outputs.name }}
-          tags: ${{ steps.vars.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
-          sbom: false
-          outputs: type=image,name=${{ steps.vars.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }},push=true,compression=gzip,compression-level=9,force-compression=true
-
-      - name: Fail workflow if push failed twice
-        if: steps.docker_build.outcome == 'failure' && steps.docker_build_retry.outcome == 'failure'
-        run: |
-          echo "Image push failed in both attempts" >&2
-          exit 1
+          outputs: type=image,name=${{ steps.vars.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }},push=true,compression=gzip,compression-level=6,force-compression=true
 
       - name: Image digest
-        shell: bash
-        run: |
-          if [ "${{ steps.docker_build.outcome }}" = "success" ]; then
-            echo "${{ steps.docker_build.outputs.digest }}"
-          else
-            echo "${{ steps.docker_build_retry.outputs.digest }}"
-          fi
+        run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Install Argo CD CLI
         shell: bash
