@@ -13,11 +13,8 @@ jobs:
   Build-and-Push:
     environment: dev
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     outputs:
-      image_repository: ${{ steps.vars.outputs.image_repository }}
+      image_repository: ${{ steps.image.outputs.image_repository }}
       develop_tag: ${{ steps.vars.outputs.develop_tag }}
 
     steps:
@@ -28,18 +25,10 @@ jobs:
         id: vars
         shell: bash
         run: |
-          repo_name=$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
-          owner_lc=$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')
           echo "branch=$(echo ${GITHUB_REF#refs/heads/} | sed 's#/#-#g')" >> "$GITHUB_OUTPUT"
           echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
-          echo "repo_name=$repo_name" >> "$GITHUB_OUTPUT"
-          echo "image_repository=ghcr.io/$owner_lc/$repo_name" >> "$GITHUB_OUTPUT"
           echo "develop_tag=develop_$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Print build details
-        run: |
-          printf 'Image Repository: %s\n' "${{ steps.vars.outputs.image_repository }}"
-          printf 'Develop Tag: %s\n' "${{ steps.vars.outputs.develop_tag }}"
 
       - name: Set up Docker Buildx
         id: buildx
@@ -58,24 +47,27 @@ jobs:
           set -euo pipefail
           aws s3 cp s3://${{ secrets.ENV_FILE_BUCKET_PATH }}/.env ./.env
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push image to GHCR
+      - name: Resolve ECR image repository
+        id: image
+        shell: bash
+        run: |
+          echo "image_repository=${{ steps.ecr.outputs.registry }}/patient_portal_dev_uat" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image to ECR
         id: docker_build
         uses: docker/build-push-action@v7
         with:
           context: ./
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
-          tags: ${{ steps.vars.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }}
+          tags: ${{ steps.image.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }}
           provenance: false
           sbom: false
-          outputs: type=image,name=${{ steps.vars.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }},push=true,compression=gzip,compression-level=6,force-compression=true
+          outputs: type=image,name=${{ steps.image.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }},push=true,compression=gzip,compression-level=6,force-compression=true
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
