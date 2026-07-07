@@ -217,5 +217,8 @@ jobs:
       - name: Sync Argo CD application
         shell: bash
         run: |
-          argocd app sync ${{ secrets.ARGOCD_APP_NAME }}
+          # app has auto-sync: an explicit sync can collide with the in-flight
+          # auto-sync ("another operation is already in progress") — tolerate it
+          argocd app sync ${{ secrets.ARGOCD_APP_NAME }} --async \
+            || echo "sync already running (auto-sync) — waiting for it instead"
           argocd app wait ${{ secrets.ARGOCD_APP_NAME }} --health --sync --timeout 600
