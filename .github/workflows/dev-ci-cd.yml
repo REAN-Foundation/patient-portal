@@ -200,11 +200,12 @@ jobs:
         run: |
           # argocd CLI expects host:port without scheme or path
           server=$(printf '%s' '${{ secrets.ARGOCD_SERVER }}' | tr -d '\r' | sed -E 's#^[[:space:]]+##; s#[[:space:]]+$##; s#^https?://##; s#/.*$##')
-          argocd login "$server" \
+          login() { argocd login "$server" \
             --username ${{ secrets.ARGOCD_USERNAME }} \
             --password ${{ secrets.ARGOCD_PASSWORD }} \
-            --grpc-web \
-            --insecure
+            --grpc-web --insecure "$@"; }
+          # server may terminate TLS or speak plain HTTP (NodePort) — try both
+          login || login --plaintext
 
       - name: Update Argo CD app image values (Helm)
         shell: bash
