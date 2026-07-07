@@ -1,10 +1,3 @@
-# This workflow will trigger pull requests and apply a label based on the
-# paths that are modified in the pull request.
-#
-# To use this workflow, you will need to set up a .github/labeler.yml
-# file with configuration.  For more information, see:
-# https://github.com/actions/labeler
-
 name: Dev-CI-CD
 
 # Controls when the workflow will run
@@ -17,62 +10,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Build-and-Deploy-ArgoCD:
+  Build-and-Push:
     environment: dev
-    runs-on: [self-hosted, onprem-harbor]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_repository: ${{ steps.vars.outputs.image_repository }}
+      develop_tag: ${{ steps.vars.outputs.develop_tag }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Ensure local tools on PATH (self-hosted runner)
-        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
       - name: Declare some variables
         id: vars
         shell: bash
         run: |
-          harbor_registry_raw=$(printf '%s' '${{ secrets.HARBOR_REGISTRY }}' | tr -d '\r' | sed 's/^"//;s/"$//')
-          harbor_registry=$(printf '%s' "$harbor_registry_raw" | sed -E 's#^[[:space:]]+##; s#[[:space:]]+$##; s#^https?://##; s#/.*$##; s#/$##')
-          harbor_project=$(printf '%s' '${{ secrets.HARBOR_PROJECT }}' | sed 's/^"//;s/"$//; s#^/##; s#/$##')
-
-          if [ -z "$harbor_registry" ]; then
-            echo "HARBOR_REGISTRY resolved to an empty value after normalization" >&2
-            exit 1
-          fi
-
-          if [ -z "$harbor_project" ]; then
-            echo "HARBOR_PROJECT is empty" >&2
-            exit 1
-          fi
-
           repo_name=$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
+          owner_lc=$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')
           echo "branch=$(echo ${GITHUB_REF#refs/heads/} | sed 's#/#-#g')" >> "$GITHUB_OUTPUT"
           echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           echo "repo_name=$repo_name" >> "$GITHUB_OUTPUT"
-          echo "harbor_registry=$harbor_registry" >> "$GITHUB_OUTPUT"
-          echo "harbor_project=$harbor_project" >> "$GITHUB_OUTPUT"
-          echo "image_repository=$harbor_registry/$harbor_project/$repo_name" >> "$GITHUB_OUTPUT"
+          echo "image_repository=ghcr.io/$owner_lc/$repo_name" >> "$GITHUB_OUTPUT"
           echo "develop_tag=develop_$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Print Branch Details
-        env:
-          BRANCH: ${{ steps.vars.outputs.branch }}
-          SHA_SHORT: ${{ steps.vars.outputs.sha_short }}
-          REPO_NAME: ${{ steps.vars.outputs.repo_name }}
-          HARBOR_REGISTRY: ${{ steps.vars.outputs.harbor_registry }}
-          HARBOR_PROJECT: ${{ steps.vars.outputs.harbor_project }}
-          IMAGE_REPOSITORY: ${{ steps.vars.outputs.image_repository }}
-          DEVELOP_TAG: ${{ steps.vars.outputs.develop_tag }}
+      - name: Print build details
         run: |
-          printf 'Branch: %s\n' "$BRANCH"
-          printf 'Sha: %s\n' "$SHA_SHORT"
-          printf 'Repo: %s\n' "$REPO_NAME"
-          printf 'Harbor Registry: %s\n' "$HARBOR_REGISTRY"
-          printf 'Harbor Project: %s\n' "$HARBOR_PROJECT"
-          printf 'Image Repository: %s\n' "$IMAGE_REPOSITORY"
-          printf 'Develop Tag: %s\n' "$DEVELOP_TAG"
-
+          printf 'Image Repository: %s\n' "${{ steps.vars.outputs.image_repository }}"
+          printf 'Develop Tag: %s\n' "${{ steps.vars.outputs.develop_tag }}"
 
       - name: Set up Docker Buildx
         id: buildx
@@ -91,92 +58,20 @@ jobs:
           set -euo pipefail
           aws s3 cp s3://${{ secrets.ENV_FILE_BUCKET_PATH }}/.env ./.env
 
-      - name: Harbor auth preflight
-        shell: bash
-        env:
-          HARBOR_REGISTRY: ${{ steps.vars.outputs.harbor_registry }}
-        run: |
-          set -euo pipefail
-
-          echo "Checking Harbor /v2/ endpoint and redirects"
-          curl -sSIL "https://${HARBOR_REGISTRY}/v2/" | tr -d '\r'
-
-          challenge=$(curl -sSI "https://${HARBOR_REGISTRY}/v2/" | tr -d '\r')
-          echo "$challenge"
-
-          www_auth=$(printf '%s\n' "$challenge" | awk 'BEGIN{IGNORECASE=1} /^Www-Authenticate:/{sub(/^Www-Authenticate:[[:space:]]*/,""); print}')
-          if [ -z "$www_auth" ]; then
-            echo "No Www-Authenticate header received from Harbor /v2/ endpoint" >&2
-            exit 1
-          fi
-
-          service=$(printf '%s\n' "$www_auth" | sed -n 's/.*service="\([^"]*\)".*/\1/p')
-          realm=$(printf '%s\n' "$www_auth" | sed -n 's/.*realm="\([^"]*\)".*/\1/p')
-
-          echo "Auth realm: ${realm:-<empty>}"
-          echo "Auth service: ${service:-<empty>}"
-
-          if [ -z "$service" ]; then
-            echo "Harbor auth challenge returned empty service. Check Harbor externalURL/ingress and core/registry config." >&2
-            exit 1
-          fi
-
-      - name: Log in to Harbor
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ${{ steps.vars.outputs.harbor_registry }}
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # TEMP DEBUG: pinpoint where the Azure runner -> server network path drops
-      # packets. Runs inside the job right before the failing push. Remove once
-      # the loss point (server ISP vs Azure transit) is identified.
-      - name: Network path diagnostics (debug)
-        continue-on-error: true
-        shell: bash
-        env:
-          HARBOR_REGISTRY: ${{ steps.vars.outputs.harbor_registry }}
-        run: |
-          set +e
-          echo "==== Runner egress IP + region ===="
-          curl -sS --max-time 10 https://ipinfo.io 2>/dev/null || true
-          echo ""
-
-          echo "==== Resolve target ===="
-          getent hosts "$HARBOR_REGISTRY" || nslookup "$HARBOR_REGISTRY" || true
-          TARGET_IP=$(getent hosts "$HARBOR_REGISTRY" | awk '{print $1}' | head -1)
-          echo "Target: $HARBOR_REGISTRY -> ${TARGET_IP:-unknown}"
-
-          echo "==== Installing mtr + traceroute ===="
-          sudo apt-get update -qq >/dev/null 2>&1
-          sudo apt-get install -y -qq mtr-tiny traceroute >/dev/null 2>&1
-
-          echo "==== ping (30 packets) ===="
-          ping -c 30 "$HARBOR_REGISTRY" || true
-
-          echo "==== mtr report: per-hop loss %, TCP/443, 50 cycles ===="
-          sudo mtr -rwz -c 50 -T -P 443 "$HARBOR_REGISTRY" || sudo mtr -rwz -c 50 "$HARBOR_REGISTRY" || true
-
-          echo "==== traceroute TCP/443 ===="
-          sudo traceroute -T -p 443 -n "$HARBOR_REGISTRY" || traceroute -n "$HARBOR_REGISTRY" || true
-
-          echo "==== PMTU probe (DF-bit ping sweep) ===="
-          for sz in 1400 1440 1460 1472; do
-            printf "payload %s bytes: " "$sz"
-            ping -c 2 -M do -s "$sz" -W 2 "$HARBOR_REGISTRY" >/dev/null 2>&1 && echo OK || echo "DROP (too big for path)"
-          done
-
-          echo "==== TLS handshake timing to :443 ===="
-          curl -sS -o /dev/null -w 'dns=%{time_namelookup}s connect=%{time_connect}s tls=%{time_appconnect}s http=%{http_code}\n' "https://$HARBOR_REGISTRY/v2/" || true
-
-      - name: Build and push image to Harbor
+      - name: Build and push image to GHCR
         id: docker_build
         uses: docker/build-push-action@v7
         with:
           context: ./
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
-          network: host # Forces buildx to use the runner's direct public network card
           tags: ${{ steps.vars.outputs.image_repository }}:${{ steps.vars.outputs.develop_tag }}
           provenance: false
           sbom: false
@@ -184,6 +79,17 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+  Deploy-ArgoCD:
+    # argocd server is only reachable inside the on-prem network (NodePort),
+    # so the deploy step runs on the on-prem runner. No image data flows here.
+    environment: dev
+    needs: Build-and-Push
+    runs-on: [self-hosted, onprem-harbor]
+
+    steps:
+      - name: Ensure local tools on PATH (self-hosted runner)
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Install Argo CD CLI
         shell: bash
@@ -211,8 +117,8 @@ jobs:
         shell: bash
         run: |
           argocd app set ${{ secrets.ARGOCD_APP_NAME }} \
-            -p image.repository=${{ steps.vars.outputs.image_repository }} \
-            -p image.tag=${{ steps.vars.outputs.develop_tag }}
+            -p image.repository=${{ needs.Build-and-Push.outputs.image_repository }} \
+            -p image.tag=${{ needs.Build-and-Push.outputs.develop_tag }}
 
       - name: Sync Argo CD application
         shell: bash
