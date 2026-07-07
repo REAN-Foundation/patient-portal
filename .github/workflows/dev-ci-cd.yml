@@ -25,6 +25,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ensure local tools on PATH (self-hosted runner)
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       - name: Declare some variables
         id: vars
         shell: bash
