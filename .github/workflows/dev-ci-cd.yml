@@ -108,8 +108,11 @@ jobs:
       - name: Update Argo CD app image values (Helm)
         shell: bash
         run: |
+          # NOTE: the ECR registry hostname cannot travel via job outputs —
+          # it contains the AWS account id which Actions masks as a secret and
+          # then silently drops the whole output. It is a constant, so set here.
           argocd app set ${{ secrets.ARGOCD_APP_NAME }} \
-            -p image.repository=${{ needs.Build-and-Push.outputs.image_repository }} \
+            -p image.repository=167414264568.dkr.ecr.us-west-2.amazonaws.com/patient_portal_dev_uat \
             -p image.tag=${{ needs.Build-and-Push.outputs.develop_tag }}
 
       - name: Sync Argo CD application
