@@ -188,9 +188,12 @@ jobs:
       - name: Install Argo CD CLI
         shell: bash
         run: |
-          curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd
-          sudo mv argocd /usr/local/bin/argocd
+          if ! command -v argocd >/dev/null 2>&1; then
+            mkdir -p "$HOME/.local/bin"
+            curl -sSL -o "$HOME/.local/bin/argocd" https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+            chmod +x "$HOME/.local/bin/argocd"
+          fi
+          argocd version --client --short
 
       - name: Login to Argo CD
         shell: bash
