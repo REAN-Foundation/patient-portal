@@ -198,9 +198,12 @@ jobs:
       - name: Login to Argo CD
         shell: bash
         run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} \
+          # argocd CLI expects host:port without scheme or path
+          server=$(printf '%s' '${{ secrets.ARGOCD_SERVER }}' | tr -d '\r' | sed -E 's#^[[:space:]]+##; s#[[:space:]]+$##; s#^https?://##; s#/.*$##')
+          argocd login "$server" \
             --username ${{ secrets.ARGOCD_USERNAME }} \
             --password ${{ secrets.ARGOCD_PASSWORD }} \
+            --grpc-web \
             --insecure
 
       - name: Update Argo CD app image values (Helm)
