@@ -19,7 +19,7 @@ concurrency:
 jobs:
   Build-and-Deploy-ArgoCD:
     environment: dev
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, onprem-harbor]
 
     steps:
       - name: Checkout
