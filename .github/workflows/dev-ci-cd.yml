@@ -59,6 +59,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Copy env file
+        run: aws s3 cp s3://${{ secrets.ENV_FILE_BUCKET_PATH }}/.env ./.env
+
+      - name: Extract ORIGIN from env file
+        run: |
+          ORIGIN=$(grep '^ORIGIN=' ./.env | cut -d= -f2-)
+          echo "ORIGIN=$ORIGIN" >> "$GITHUB_ENV"
+
+      - name: Copy constant file
+        run: aws s3 cp s3://${{ secrets.CONSTANT_FILE_BUCKET_PATH }}/constants.ts ./src/lib
+
+      - name: Copy favicon file
+        run: aws s3 cp s3://${{ secrets.FAVICON_FILE_BUCKET }}/favicon.png ./static/favicon.png
+
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v3
@@ -66,6 +80,9 @@ jobs:
           context: ./
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
+          build-args: |
+            ORIGIN=${{ env.ORIGIN }}
+            ENVIRONMENT=dev
           push: true
           tags: ${{ steps.login-ecr.outputs.registry }}/rean-patient-portal:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -78,8 +95,7 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       # Mirror the freshly-pushed ECR image into Harbor (Harbor PULLS it, so no
-      # slow upload) and keep only the 5 latest. ECS is being decommissioned for
-      # dev, so this pipeline only builds/pushes/mirrors now — no ECS deploy step.
+      # slow upload) and keep only the 5 latest.
       - name: Mirror image to Harbor (keep 5 latest)
         continue-on-error: true
         shell: bash
