@@ -2,7 +2,7 @@
 # paths that are modified in the pull request.
 #
 # To use this workflow, you will need to set up a .github/labeler.yml
-# file with configuration.  For more information, see :
+# file with configuration.    For more information, see :
 # https://github.com/actions/labeler
 
 name: Dev-CI-CD
@@ -84,7 +84,7 @@ jobs:
             ORIGIN=${{ env.ORIGIN }}
             ENVIRONMENT=dev
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/rean-patient-portal:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/patient_portal_dev_uat:${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
         env:
