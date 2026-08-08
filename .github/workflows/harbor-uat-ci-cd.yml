@@ -3,7 +3,7 @@ name: UAT-CI-CD
 on:
   push:
     branches:
-      - main
+      - 'release/**'
   workflow_dispatch:
 
 jobs:
@@ -74,7 +74,7 @@ jobs:
           TAG: ${{ steps.vars.outputs.branch }}_${{ steps.vars.outputs.sha_short }}
           HARBOR_PROJECT: rean-dev
           ECR_REGISTRY_ID: "1"
-          RETENTION_ID: "3"
+          RETENTION_ID: "2"
         run: |
           set -euo pipefail
           A=(-u "${HARBOR_ROBOT}:${HARBOR_ROBOT_SECRET}")
